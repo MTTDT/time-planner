@@ -25,7 +25,7 @@ export default function Home() {
       case 'week':
         return <div>Week View Coming Soon</div>;
       case 'month':
-        return <Calendar />;
+        return <ModernCalendar />;
       default:
         return <HomeMenu setView={setCurrentView} />;
     }

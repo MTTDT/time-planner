@@ -3,6 +3,7 @@ import Image from 'next/image';
 import lg_sun from '../assets/bx-sun.png';
 import lg_moon from '../assets/bx-moon.png';
 import '../globals.css';
+import TODO from './TODO';
 
 const TopMenu = ({ theme, setTheme, onHomeClick }) => {
     const toggle_mode = () => {
@@ -25,6 +26,8 @@ const TopMenu = ({ theme, setTheme, onHomeClick }) => {
                 className='toggle-icon'
                 onClick={toggle_mode}
             />
+            <TODO />
+
         </div>
     );
 }

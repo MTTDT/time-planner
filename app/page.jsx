@@ -5,7 +5,8 @@ import DayCard from "./components/DayCard"
 import TopMenu from "./components/TopMenu";
 import HomeMenu from "./components/HomeMenu";
 import DayView from "./components/DayView";
-import ModernCalendar from "./components/ModernCalendar";
+import { Calendar } from "@heroui/react";
+import CalendarTriple from "./components/CalendarTriple";
 
 export default function Home() {
   const [theme, setTheme] = useState('light');
@@ -38,7 +39,7 @@ export default function Home() {
         setTheme={setTheme}
         onHomeClick={() => setCurrentView('home')}
       />
-      {renderView()}
+      <CalendarTriple />
     </div>
   );
 }

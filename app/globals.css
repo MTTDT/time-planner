@@ -5,6 +5,20 @@
 :root {
   --background: #ffffff;
   --foreground: #171717;
+  --menu-bg: #ffffff;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html,
+body {
+  width: 100%;
+  height: 100%;
+  overflow-x: hidden;
 }
 
 @media (prefers-color-scheme: light) {
@@ -14,8 +28,59 @@
   }
 }
 
+.dark{
+  --background-color: #1a1a1a;
+  --text-color: #ffffff;
+  --menu-bg: #2d2d2d;
+}
+
 body {
   color: var(--foreground);
   background: var(--background);
   font-family: Arial, Helvetica, sans-serif;
+  margin: 0;
+  padding: 0;
+  overflow-x: hidden;
+}
+
+.top-menu{
+  color: var(--text-color);
+  background-color: var(--menu-bg);
+  width :100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 15px 7%;
+  transition : 0.5s;
+}
+
+.container {
+  width: 100%;
+  min-height: 100vh;
+  background: var(--background);
+  transition: 0.5s;
+  margin: 0;
+  padding: 0;
+  position: relative;
+}
+
+.container.dark{
+  background: #222;
+}
+
+.toggle-icon{
+  width: 40px;
+  cursor: pointer;
+  margin-left: 40px;
+}
+ul{
+  flex: 1;
+  list-style: none;
+  text-align: center;
+}
+ul li{
+  display: inline-block;
+  margin: 10px 20px;
+  font-size: 18px;
+  cursor: pointer;
 }

@@ -5,8 +5,9 @@ import DayCard from "./components/DayCard"
 import TopMenu from "./components/TopMenu";
 import HomeMenu from "./components/HomeMenu";
 import DayView from "./components/DayView";
-import { Calendar } from "@heroui/react";
+import HeaderMenu from "./components/HeaderMenu";
 import CalendarTriple from "./components/CalendarTriple";
+
 
 export default function Home() {
   const [theme, setTheme] = useState('light');
@@ -33,7 +34,7 @@ export default function Home() {
   };
 
   return (
-    <div className={`container ${theme}`}>
+    <div className={`container ${theme} w-screen`}>
       <TopMenu 
         theme={theme} 
         setTheme={setTheme}

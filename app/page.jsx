@@ -2,10 +2,10 @@
 
 import React, { useState, useEffect } from "react";
 import DayCard from "./components/DayCard"
-import { Calendar } from "@heroui/react";
 import TopMenu from "./components/TopMenu";
 import HomeMenu from "./components/HomeMenu";
 import DayView from "./components/DayView";
+import ModernCalendar from "./components/ModernCalendar";
 
 export default function Home() {
   const [theme, setTheme] = useState('light');

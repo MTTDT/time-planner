@@ -31,6 +31,12 @@ function CalendarTriple() {
     });
     const [allEvents, setAllEvents] = useState(events);
     const [selectedDate, setSelectedDate] = useState(null);
+    const [editingEvent, setEditingEvent] = useState(null);
+    const [editForm, setEditForm] = useState({
+        title: "",
+        start: null,
+        end: null
+    });
 
     const handleSelectSlot = ({ start }) => {
         const currentHour = new Date().getHours();
@@ -99,6 +105,43 @@ function CalendarTriple() {
         setAllEvents([...allEvents, newEvent]);
         setNewEvent({ title: "", start: "", end: "" }); // Reset form
     }
+
+    const handleEventDoubleClick = (event) => {
+        setEditingEvent(event);
+        setEditForm({
+            title: event.title,
+            start: new Date(event.start),
+            end: new Date(event.end)
+        });
+    };
+
+    const handleEditSubmit = () => {
+        if (!editForm.title || !editForm.start || !editForm.end) {
+            alert("Please fill in all fields");
+            return;
+        }
+
+        setAllEvents(allEvents.map(event => 
+            event === editingEvent 
+                ? { ...editForm }
+                : event
+        ));
+        handleCancelEdit();
+    };
+
+    const handleCancelEdit = () => {
+        setEditingEvent(null);
+        setEditForm({
+            title: "",
+            start: null,
+            end: null
+        });
+    };
+
+    const handleDeleteEvent = () => {
+        setAllEvents(allEvents.filter(event => event !== editingEvent));
+        handleCancelEdit();
+    };
 
     const dayPropGetter = (date) => {
         if (selectedDate && 
@@ -171,7 +214,68 @@ function CalendarTriple() {
                 onSelectSlot={handleSelectSlot}
                 selected={selectedDate}
                 dayPropGetter={dayPropGetter}
+                onDoubleClickEvent={handleEventDoubleClick}
             />
+            {editingEvent && (
+                <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center">
+                    <div className="bg-white p-6 rounded-lg shadow-xl w-full max-w-md">
+                        <h2 className="text-xl font-bold mb-4">Edit Event</h2>
+                        <div className="space-y-4">
+                            <input 
+                                type="text" 
+                                placeholder="Event Title" 
+                                className="event-input"
+                                value={editForm.title} 
+                                onChange={(e) => setEditForm({ ...editForm, title: e.target.value })} 
+                            />
+                            <DatePicker
+                                selected={editForm.start}
+                                onChange={(date) => setEditForm({ ...editForm, start: date })}
+                                showTimeSelect
+                                showTimeSelectOnly
+                                timeFormat="HH:mm"
+                                timeIntervals={15}
+                                dateFormat="h:mm aa"
+                                placeholderText="Start Time"
+                                className="event-input"
+                            />
+                            <DatePicker
+                                selected={editForm.end}
+                                onChange={(date) => setEditForm({ ...editForm, end: date })}
+                                showTimeSelect
+                                showTimeSelectOnly
+                                timeFormat="HH:mm"
+                                timeIntervals={15}
+                                dateFormat="h:mm aa"
+                                placeholderText="End Time"
+                                className="event-input"
+                                minTime={editForm.start}
+                                maxTime={setHours(new Date(), 23)}
+                            />
+                            <div className="flex justify-end gap-2 mt-6">
+                                <button
+                                    onClick={handleDeleteEvent}
+                                    className="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600"
+                                >
+                                    Delete
+                                </button>
+                                <button
+                                    onClick={handleCancelEdit}
+                                    className="px-4 py-2 text-gray-600 hover:bg-gray-100 rounded-lg"
+                                >
+                                    Cancel
+                                </button>
+                                <button
+                                    onClick={handleEditSubmit}
+                                    className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600"
+                                >
+                                    Save Changes
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     );
 }

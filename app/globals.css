@@ -3,9 +3,14 @@
 @tailwind utilities;
 
 :root {
-  --background: #ffffff;
-  --foreground: #000000;
-  --menu-bg: #ffffff;
+  --background: #ffffff; /* White background */
+  --foreground: #00bcd4; /* Cyan foreground */
+  --menu-bg: #ffffff; /* White menu background */
+  --text-color: #00bcd4; /* Cyan text color */
+  --border-color: #00bcd4; /* Cyan border */
+  --hover-bg: rgba(0, 188, 212, 0.1); /* Light cyan hover background */
+  --shadow-color: rgba(0, 188, 212, 0.2); /* Cyan shadow color */
+  --hover-shadow: 0 4px 8px rgba(0, 188, 212, 0.5); /* Cyan hover shadow */
 }
 
 * {
@@ -19,27 +24,30 @@ body {
   width: 100%;
   height: 100%;
   overflow-x: hidden;
+  font-family: 'Arial', 'Helvetica', sans-serif;
+  background-color: var(--background);
+  color: var(--foreground);
 }
 
 @media (prefers-color-scheme: light) {
   :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+    --background: #ffffff; /* White background */
+    --foreground: #00bcd4; /* Cyan foreground */
   }
 }
 
 .dark {
-  --background: #000000;
-  --foreground: #ffffff;
-  --background-color: #1a1a1a;
-  --text-color: #ffffff;
-  --menu-bg: #2d2d2d;
+  --background: #121212; /* Black background */
+  --foreground: #ffffff; /* White text */
+  --menu-bg: #1e1e1e; /* Dark gray menu background */
+  --text-color: #ffffff; /* White text color */
+  --border-color: #333333; /* Dark gray border */
+  --hover-bg: rgba(255, 255, 255, 0.1); /* Light gray hover background */
+  --shadow-color: rgba(0, 0, 0, 0.5); /* Dark shadow color */
+  --hover-shadow: 0 4px 8px rgba(51, 51, 51, 0.5); /* Gray hover shadow */
 }
 
 body {
-  background-color: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
   margin: 0;
   padding: 0;
   overflow-x: hidden;
@@ -50,10 +58,11 @@ body {
   justify-content: space-between;
   align-items: center;
   padding: 1rem;
-  background-color: var(--background);
+  background-color: var(--menu-bg);
   border-bottom: 1px solid var(--foreground);
   color: var(--text-color);
   width: 100%;
+  box-shadow: 0 2px 4px var(--shadow-color);
   transition: 0.5s;
 }
 
@@ -66,6 +75,11 @@ body {
 .top-menu a {
   color: var(--foreground);
   text-decoration: none;
+  font-weight: bold;
+}
+
+.top-menu a:hover {
+  box-shadow: var(--hover-shadow);
 }
 
 .toggle-icon {
@@ -87,7 +101,7 @@ body {
 }
 
 .container.dark {
-  background: #222;
+  background: var(--background);
 }
 
 ul {
@@ -103,12 +117,22 @@ ul li {
   cursor: pointer;
 }
 
+ul li:hover {
+  box-shadow: var(--hover-shadow);
+}
+
 .day-view {
   width: 100%;
   max-width: 1200px;
   margin: 0 auto;
   padding: 20px;
   background-color: var(--background);
+  box-shadow: 0 4px 8px var(--shadow-color);
+  border-radius: 0.5rem;
+}
+
+.day-view:hover {
+  box-shadow: var(--hover-shadow);
 }
 
 .day-header {
@@ -117,30 +141,41 @@ ul li {
   justify-content: space-between;
   padding: 20px;
   margin-bottom: 20px;
-  border-bottom: 1px solid var(--foreground);
+  border-bottom: 1px solid var(--border-color);
+}
+
+.day-header:hover {
+  box-shadow: var(--hover-shadow);
 }
 
 .day-header h2 {
   font-size: 1.5rem;
   font-weight: bold;
-  color: var(--foreground);
+  color: var(--border-color);
 }
 
 .time-grid {
   display: flex;
   flex-direction: column;
-  border: 1px solid rgba(var(--foreground), 0.1);
+  border: 2px solid var(--border-color);
   border-radius: 0.5rem;
   overflow: hidden;
+}
+
+.time-grid:hover {
+  box-shadow: var(--hover-shadow);
 }
 
 .time-slot {
   display: flex;
   min-height: 60px;
-  border-bottom: 1px solid rgba(var(--foreground), 0.1);
+  border-bottom: 2px solid var(--border-color);
   background-color: var(--background);
   position: relative;
-  cursor: pointer;
+}
+
+.time-slot:hover {
+  box-shadow: var(--hover-shadow);
 }
 
 .time-slot::after {
@@ -149,7 +184,7 @@ ul li {
   left: 80px; /* Same as time-label width */
   right: 0;
   top: 50%;
-  border-bottom: 1px dashed rgba(var(--foreground), 0.1);
+  border-bottom: 2px dashed var(--border-color);
   pointer-events: none;
 }
 
@@ -167,13 +202,17 @@ ul li {
   color: var(--foreground);
   opacity: 0.7;
   font-size: 14px;
-  border-right: 1px solid rgba(var(--foreground), 0.1);
+  border-right: 1px solid var(--border-color);
   display: flex;
   align-items: center;
   justify-content: center;
   background-color: rgba(var(--foreground), 0.03);
   position: relative;
   z-index: 1;
+}
+
+.time-label:hover {
+  box-shadow: var(--hover-shadow);
 }
 
 .event-space {
@@ -199,13 +238,13 @@ ul li {
 }
 
 .event-dialog {
-  background-color: var(--background);
   padding: 1.5rem;
   border-radius: 0.5rem;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
   max-width: 28rem;
   width: 90%;
   color: var(--foreground);
+  background-color: var(--hover-bg);
+  box-shadow: var(--hover-shadow);
 }
 
 .home-menu {
@@ -214,6 +253,11 @@ ul li {
   gap: 1rem;
   max-width: 300px;
   margin: 2rem auto;
+  transition: box-shadow 0.3s ease;
+}
+
+.home-menu:hover {
+  box-shadow: var(--hover-shadow);
 }
 
 .view-btn {
@@ -230,6 +274,7 @@ ul li {
 .view-btn:hover {
   background-color: var(--foreground);
   color: var(--background);
+  box-shadow: var(--hover-shadow);
 }
 
 .nav-btn {
@@ -244,6 +289,7 @@ ul li {
 .nav-btn:hover {
   background-color: var(--foreground);
   color: var(--background);
+  box-shadow: var(--hover-shadow);
 }
 
 .date-display {
@@ -251,6 +297,10 @@ ul li {
   display: flex;
   flex-direction: column;
   align-items: center;
+}
+
+.date-display:hover {
+  box-shadow: var(--hover-shadow);
 }
 
 .date-selector {
@@ -263,19 +313,30 @@ ul li {
 }
 
 .date-selector:hover {
-  background-color: rgba(var(--foreground), 0.05);
+  background-color: var(--hover-bg);
   border-radius: 0.5rem;
+  box-shadow: var(--hover-shadow);
 }
 
 .month-year {
   font-size: 1.2rem;
   font-weight: bold;
   margin-bottom: 0.25rem;
+  color: var(--foreground);
+}
+
+.month-year:hover {
+  box-shadow: var(--hover-shadow);
 }
 
 .weekday-day {
   font-size: 1rem;
   opacity: 0.8;
+  color: var(--foreground);
+}
+
+.weekday-day:hover {
+  box-shadow: var(--hover-shadow);
 }
 
 .calendar-popup {
@@ -285,25 +346,34 @@ ul li {
   transform: translateX(-50%);
   z-index: 10;
   background-color: var(--background);
-  border: 1px solid rgba(var(--foreground), 0.1);
+  border: 1px solid var(--border-color);
   border-radius: 0.5rem;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 4px 6px var(--shadow-color);
   padding: 1rem;
   margin-top: 0.5rem;
+}
+
+.calendar-popup:hover {
+  box-shadow: var(--hover-shadow);
 }
 
 .calendar-popup .heroicon-calendar {
   color: var(--foreground);
 }
 
+.calendar-popup .heroicon-calendar:hover {
+  box-shadow: var(--hover-shadow);
+}
+
 .calendar-popup .heroicon-calendar-day {
   background-color: var(--background);
   color: var(--foreground);
-  border: 1px solid rgba(var(--foreground), 0.1);
+  border: 50px solid var(--border-color);
 }
 
 .calendar-popup .heroicon-calendar-day:hover {
-  background-color: rgba(var(--foreground), 0.05);
+  background-color: var(--hover-bg);
+  box-shadow: var(--hover-shadow);
 }
 
 .calendar-popup .heroicon-calendar-day.selected {
@@ -315,16 +385,46 @@ ul li {
   background: var(--background);
   color: var(--foreground);
   background-color: var(--background);
+  border: 2px solid var(--border-color); /* Added thicker border */
+  border-radius: 0.5rem; /* KEICIA KALENDORIAUS LINIJAS */
+}
+
+.rbc-calendar:hover {
+  box-shadow: var(--hover-shadow);
 }
 
 .rbc-toolbar button {
-  color: var(--foreground);
+  color: white;
+  background-color: #00bcd4; /* Cyan background */
+  border: 10px solid #00bcd4; /* Increased border thickness */
+  padding: 0.75rem 1.5rem; /* Increased padding for a thicker appearance */
+  border-radius: 0.375rem;
+  cursor: pointer;
+  transition: background-color 0.2s, color 0.2s;
+}
+
+.rbc-toolbar button:hover {
+  background-color: #0097a7; /* Darker cyan */
+  border-color: #0097a7;
+  box-shadow: var(--hover-shadow);
 }
 
 .rbc-toolbar button:active,
 .rbc-toolbar button.rbc-active {
-  background-color: var(--foreground);
-  color: var(--background);
+  background-color: #0097a7; /* Darker cyan */
+  color: white;
+}
+
+.dark .rbc-toolbar button {
+  background-color: #000000; /* Black background */
+  color: white;
+  border: 1px solid #333333; /* Dark gray border */
+}
+
+.dark .rbc-toolbar button:hover {
+  background-color: #333333; /* Dark gray background */
+  border-color: #333333;
+  box-shadow: var(--hover-shadow);
 }
 
 .calendar-controls {
@@ -333,30 +433,34 @@ ul li {
   margin: 1rem;
 }
 
+.calendar-controls:hover {
+  box-shadow: var(--hover-shadow);
+}
+
 .event-form-popover {
   display: flex;
   flex-direction: column;
   gap: 0.5rem;
+  border: 1px solid var(--border-color);
+}
+
+.event-form-popover:hover {
+  box-shadow: var(--hover-shadow);
 }
 
 .event-input {
   padding: 0.5rem;
-  border: 1px solid #e2e8f0;
+  border: 1px solid var(--border-color); /* zemiau calendar keicia */
   border-radius: 0.375rem;
   width: 100%;
   margin-bottom: 0.5rem;
 }
 
-.event-input:focus {
-  outline: none;
-  border-color: #3b82f6;
-  ring: 2px;
-  ring-color: #3b82f6;
 }
 
 .add-button {
   padding: 0.5rem 1rem;
-  background-color: #0070f3;
+  background-color: var(--foreground);
   color: white;
   border: none;
   border-radius: 0.375rem;
@@ -365,19 +469,20 @@ ul li {
 }
 
 .add-button:hover {
-  background-color: #0051bb;
+  background-color: #0097a7; /* Darker cyan */
+  box-shadow: var(--hover-shadow);
 }
 
 /* Dark mode styles */
 .dark .event-form-popover {
-  background-color: #2d2d2d;
-  border-color: #404040;
+  background-color: #1e1e1e; /* Dark gray background */
+  border-color: #333333; /* Dark gray border */
 }
 
 .dark .event-input {
-  background-color: #2d2d2d;
-  color: #ffffff;
-  border-color: #404040;
+  background-color: #1e1e1e; /* Dark gray background */
+  color: #ffffff; /* White text */
+  border-color: #333333; /* Dark gray border */
 }
 
 .rbc-day-bg {
@@ -386,34 +491,51 @@ ul li {
 }
 
 .rbc-day-selected {
-  background-color: rgba(66, 153, 225, 0.1) !important;
+  background-color: rgba(0, 188, 212, 0.1) !important; /* Light cyan */
 }
 
 .rbc-selected-cell {
-  background-color: rgba(66, 153, 225, 0.1) !important;
+  background-color: rgba(0, 188, 212, 0.1) !important; /* Light cyan */
+}
+
+.rbc-day-bg.rbc-off-range-bg {
+  background-color: rgba(22, 212, 241, 0.05); /* OFF RANGE COLOR */
 }
 
 .dark .rbc-day-selected,
 .dark .rbc-selected-cell {
-  background-color: rgba(66, 153, 225, 0.2) !important;
+  background-color: rgba(51, 51, 51, 0.5) !important; /* Dark gray */
 }
 
 .rbc-day-bg.selected-day {
-    border: 2px solid #0070f3 !important;
-    background-color: rgba(0, 112, 243, 0.1);
+  border: 2px solid var(--foreground) !important; /* Cyan border */
+  background-color: rgba(0, 188, 212, 0.1); /* Light cyan */
 }
 
 .dark .rbc-day-bg.selected-day {
-    border: 2px solid #3291ff !important;
-    background-color: rgba(50, 145, 255, 0.1);
+  border: 2px solid #333333 !important; /* Dark gray border */
+  background-color: rgba(51, 51, 51, 0.5); /* Dark gray */
 }
 
 .selected-day {
-    border: 2px solid #0070f3 !important;
-    background-color: rgba(0, 112, 243, 0.1) !important;
+  border: 2px solid var(--foreground) !important; /* Cyan border */
+  background-color: rgba(0, 188, 212, 0.1) !important; /* Light cyan */
 }
 
 .dark .selected-day {
-    border: 2px solid #3291ff !important;
-    background-color: rgba(50, 145, 255, 0.1) !important;
+  border: 2px solid #333333 !important; /* Dark gray border */
+  background-color: rgba(51, 51, 51, 0.5) !important; /* Dark gray */
+}
+.dark .add-button {
+  background-color: #000000; /* Black background */
+  color: white;
+}
+
+.dark .add-button:hover {
+  background-color: #333333; /* Dark gray background */
+  box-shadow: var(--hover-shadow);
+}
+.dark .rbc-today {
+  background-color: #333333 !important; /* Dark gray background for dark mode */
+  color: white; /* White text for dark mode */
 }

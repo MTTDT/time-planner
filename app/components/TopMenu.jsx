@@ -4,6 +4,7 @@ import lg_sun from '../assets/bx-sun.png';
 import lg_moon from '../assets/bx-moon.png';
 import '../globals.css';
 import TODO from './TODO';
+import NotificationButton from './NotificationButton';
 
 const TopMenu = ({ theme, setTheme, onHomeClick }) => {
     const toggle_mode = () => {
@@ -18,6 +19,7 @@ const TopMenu = ({ theme, setTheme, onHomeClick }) => {
                     onHomeClick();
                 }}>Home</a></li>
                 <li><a href="#">About</a></li>
+                <li><NotificationButton/></li>
             </ul>
             
             <Image 

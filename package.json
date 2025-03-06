@@ -13,6 +13,7 @@
     "@heroicons/react": "^2.2.0",
     "@heroui/react": "^2.7.4",
     "@internationalized/date": "^3.7.0",
+    "@radix-ui/react-scroll-area": "^1.2.3",
     "autoprefixer": "^10.4.20",
     "date-fns": "^4.1.0",
     "framer-motion": "^12.4.7",

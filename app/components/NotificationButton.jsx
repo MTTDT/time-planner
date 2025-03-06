@@ -1,4 +1,5 @@
-"use client"
+'use client'
+
 import { useEffect, useState } from 'react';
 
 const NotificationButton = () => {
@@ -28,9 +29,11 @@ const NotificationButton = () => {
 
   return (
     <div>
-      <button onClick={handleNotification}>Get notification!!</button>
+      <button onClick={handleNotification}>Ping</button>
     </div>
   );
 };
 
 export default NotificationButton;
+
+

@@ -5,21 +5,25 @@ import lg_moon from '../assets/bx-moon.png';
 import '../globals.css';
 import TODO from './TODO';
 import NotificationButton from './NotificationButton';
+import NotificationContainer from './NotificationContainer';
 
 const TopMenu = ({ theme, setTheme, onHomeClick }) => {
     const toggle_mode = () => {
         theme == 'light' ? setTheme('dark') : setTheme('light');
     }
     
+    
     return (
-        <div className={`top-menu ${theme}`}>
+        <div className={`top-menu ${theme} space-x-3`}>
             <ul>
                 <li><a href="#" onClick={(e) => {
                     e.preventDefault();
                     onHomeClick();
                 }}>Home</a></li>
                 <li><a href="#">About</a></li>
-                <li><NotificationButton/></li>
+                <li>        <NotificationButton />
+                </li>
+
             </ul>
             
             <Image 
@@ -28,6 +32,7 @@ const TopMenu = ({ theme, setTheme, onHomeClick }) => {
                 className='toggle-icon'
                 onClick={toggle_mode}
             />
+            <NotificationContainer />
             <TODO />
 
         </div>

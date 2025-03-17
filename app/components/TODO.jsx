@@ -2,6 +2,8 @@
 
 import { useState, useEffect } from "react"
 import { PlusCircle, Trash2, X, Check, ClipboardList, Clock, Bell, ChevronUp, ChevronDown } from "lucide-react"
+import PointsNumber from "./PointsNumber"
+import { getPoints, addPoint, subscribe, clearPoints } from "./pointsNumber";
 
 export default function TODO() {
   const [tasks, setTasks] = useState([])
@@ -14,6 +16,7 @@ export default function TODO() {
   const [notifications, setNotifications] = useState([])
   const [currentTime, setCurrentTime] = useState(Date.now())
 
+  
   // Update current time every second to refresh time displays
   useEffect(() => {
     const interval = setInterval(() => {
@@ -69,13 +72,29 @@ export default function TODO() {
     setNewTaskText("")
   }
 
+
   // Toggle task completion status
   const toggleTask = (id) => {
-    setTasks(tasks.map((task) => (task.id === id ? { ...task, completed: !task.completed } : task)))
-    // Remove notification if task is completed
-    if (tasks.find((task) => task.id === id)?.completed === false) {
-      setNotifications(notifications.filter((notification) => notification.taskId !== id))
-    }
+
+ 
+
+  // Find the current task state before updating
+  const currentTask = tasks.find((task) => task.id === id)
+  const isCurrentlyCompleted = currentTask?.completed
+
+  // Update tasks
+  setTasks(tasks.map((task) => (task.id === id ? { ...task, completed: !task.completed } : task)))
+
+  // Remove notification if task is completed
+  if (tasks.find((task) => task.id === id)?.completed === false) {
+    setNotifications(notifications.filter((notification) => notification.taskId !== id))
+  }
+
+  // Only add points if the task is being marked as completed (not uncompleted)
+  if (isCurrentlyCompleted === false) {
+    console.log("Adding point...")
+    addPoint()
+  }
   }
 
   // Remove a single task
@@ -196,6 +215,7 @@ export default function TODO() {
     <>
       {/* Fixed button to toggle the todo list with clock animation */}
       <div className="relative">
+        <div className="flex items-center">
         <button
           onClick={toggleTodoList}
           className="z-40 text-primary-black p-4 rounded-full hover:bg-gray-200 transition-all"
@@ -203,6 +223,8 @@ export default function TODO() {
         >
           <ClipboardList className="h-6 w-6" />
         </button>
+        <PointsNumber/>
+        </div>
 
         {/* Clock animation that appears when there are active tasks with time limits */}
         {hasActiveTimeLimitTasks && (

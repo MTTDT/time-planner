@@ -14,7 +14,7 @@ export default function Home() {
   }, [theme]);
 
   return (
-    <div className={`container ${theme} w-screen`}>
+    <div className={` ${theme} w-screen`}>
       <TopMenu 
         theme={theme} 
         setTheme={setTheme}

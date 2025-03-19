@@ -16,9 +16,13 @@ const TopMenu = ({ theme, setTheme, onHomeClick }) => {
     return (
         <div className={`top-menu ${theme} space-x-3`}>
             <ul>
-                <li><a href="#" onClick={(e) => {
-                    e.preventDefault();
-                    onHomeClick();
+                <li><a href="/" onClick={(e) => {
+                    if(onHomeClick) {
+                        e.preventDefault();
+
+                        onHomeClick();
+                    }
+
                 }}>Home</a></li>
                 <li><a href="#">About</a></li>
                 <li>        <NotificationButton />

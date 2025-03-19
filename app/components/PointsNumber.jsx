@@ -1,14 +1,15 @@
 "use client"
 
 import { Star } from "lucide-react"
-import { getPoints, addPoint, subscribe, clearPoints } from "./pointsNumber";
+import { getPoints, subscribe, clearPoints } from "./pointsStorage";
 import { useEffect, useState } from "react";
 
-const PointsNumber = ({ number }) => {
+const PointsNumber = () => {
     const [showPopup, setShowPopup] = useState(false)
 
-    const [points, setPoints] = useState(getPoints());
+    const [points, setPoints] = useState(0);
   useEffect(() => {
+    setPoints(getPoints())
     const unsubscribe = subscribe(setPoints);
     return () => unsubscribe();
   }, []);
@@ -54,16 +55,16 @@ const PointsNumber = ({ number }) => {
           <div className="flex flex-col gap-2 min-w-[120px]">
             <button
               onClick={handleClear}
-              className="bg-red-500 text-white py-1 px-3 rounded hover:bg-red-600 transition-colors"
+              className="bg-red-200 py-1 px-3 rounded hover:bg-red-300 transition-colors font-bold"
             >
               Clear
             </button>
             <a
-              href="#"
-              className="bg-blue-500 text-white py-1 px-3 rounded hover:bg-blue-600 transition-colors text-center"
+              href="/overview"
+              className="bg-gray-600 py-1 px-3 rounded hover:bg-gray-700 transition-colors text-center"
               onClick={() => setShowPopup(false)}
             >
-              Analytics
+              Overview
             </a>
           </div>
         </div>

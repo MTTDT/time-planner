@@ -1,9 +1,24 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { PlusCircle, Trash2, X, Check, ClipboardList, Clock, Bell, ChevronUp, ChevronDown } from "lucide-react"
+import { 
+  PlusCircle,
+  Trash2,
+  X,
+  Check,
+  ClipboardList,
+  Clock,
+  Bell,
+  ChevronUp,
+  ChevronDown,
+  Settings,
+  Volume2,
+  VolumeX,
+  BellRing,
+ } from "lucide-react"
 import PointsNumber from "./PointsNumber"
-import { getPoints, addPoint, subscribe, clearPoints } from "./pointsNumber";
+import { getPoints, addPoint, subscribe, clearPoints } from "./pointsStorage";
+
 
 export default function TODO() {
   const [tasks, setTasks] = useState([])
@@ -15,8 +30,26 @@ export default function TODO() {
   const [minutes, setMinutes] = useState(30)
   const [notifications, setNotifications] = useState([])
   const [currentTime, setCurrentTime] = useState(Date.now())
+  // Track tasks that have already had notifications shown
+  const [notifiedTasks, setNotifiedTasks] = useState({
+    tenMinWarning: new Set(),
+    timeUp: new Set(),
+  })
 
-  
+  // Settings state
+  const [settingsOpen, setSettingsOpen] = useState(false)
+  const [notificationMinutes, setNotificationMinutes] = useState(10)
+  const [notificationsEnabled, setNotificationsEnabled] = useState(true)
+  const [soundEnabled, setSoundEnabled] = useState(true)
+
+  // Simple beep function that works in most browsers
+  const playBeep = () => {
+    if (!soundEnabled) return // Skip if sound is disabled
+
+    const audio = new Audio("/soundEffects/beep.wav")
+    audio.play();
+  }
+
   // Update current time every second to refresh time displays
   useEffect(() => {
     const interval = setInterval(() => {
@@ -30,13 +63,29 @@ export default function TODO() {
   useEffect(() => {
     const interval = setInterval(() => {
       const now = Date.now()
+      const warningTimeInMs = notificationMinutes * 60 * 1000
+
+      // Skip if notifications are disabled
+      if (!notificationsEnabled) return
 
       tasks.forEach((task) => {
         if (task.timeLimit && task.timeLimit > 0 && !task.completed) {
           const timeRemaining = task.timeLimit - now
 
-          // If time limit has been reached and notification hasn't been shown yet
-          if (timeRemaining <= 0 && !notifications.some((n) => n.taskId === task.id)) {
+          // If warning time or less remaining and notification hasn't been shown yet
+          if (
+            timeRemaining <= warningTimeInMs && timeRemaining >= warningTimeInMs - 1.5 *60*1000 &&
+            timeRemaining > 0 &&
+            !notifiedTasks.tenMinWarning.has(task.id) &&
+            !notifications.some((n) => n.taskId === task.id)
+          ) {
+            // Add to notified tasks set
+            setNotifiedTasks((prev) => ({
+              ...prev,
+              tenMinWarning: new Set([...prev.tenMinWarning, task.id]),
+            }))
+
+            // Add notification
             setNotifications((prev) => [
               ...prev,
               {
@@ -44,15 +93,46 @@ export default function TODO() {
                 taskId: task.id,
                 taskText: task.text,
                 timestamp: now,
+                isEarlyWarning: true,
               },
             ])
+
+            // Play notification sound (same as test sound)
+            playBeep()
+          }
+          // If time is up and notification hasn't been shown yet
+          else if (
+            timeRemaining <= 0 &&
+            !notifiedTasks.timeUp.has(task.id) &&
+            !notifications.some((n) => n.taskId === task.id)
+          ) {
+            // Add to notified tasks set
+            setNotifiedTasks((prev) => ({
+              ...prev,
+              timeUp: new Set([...prev.timeUp, task.id]),
+            }))
+
+            // Add notification
+            setNotifications((prev) => [
+              ...prev,
+              {
+                id: Date.now().toString(),
+                taskId: task.id,
+                taskText: task.text,
+                timestamp: now,
+                isEarlyWarning: false,
+              },
+            ])
+
+            // Play notification sound (same as test sound)
+            playBeep()
           }
         }
       })
     }, 1000) // Check every second
 
     return () => clearInterval(interval)
-  }, [tasks, notifications])
+  }, [tasks, notifications, notifiedTasks, notificationMinutes, notificationsEnabled, soundEnabled])
 
   // Check if there are any active tasks with time limits
   const hasActiveTimeLimitTasks = tasks.some((task) => task.timeLimit && !task.completed)
@@ -97,11 +177,22 @@ export default function TODO() {
   }
   }
 
-  // Remove a single task
   const removeTask = (id) => {
     setTasks(tasks.filter((task) => task.id !== id))
     // Remove any notifications for this task
     setNotifications(notifications.filter((notification) => notification.taskId !== id))
+
+    // Remove from notified tasks sets
+    setNotifiedTasks((prev) => {
+      const newTenMinWarning = new Set(prev.tenMinWarning)
+      const newTimeUp = new Set(prev.timeUp)
+      newTenMinWarning.delete(id)
+      newTimeUp.delete(id)
+      return {
+        tenMinWarning: newTenMinWarning,
+        timeUp: newTimeUp,
+      }
+    })
   }
 
   // Remove all completed tasks
@@ -110,6 +201,22 @@ export default function TODO() {
     setTasks(tasks.filter((task) => !task.completed))
     // Remove notifications for completed tasks
     setNotifications(notifications.filter((notification) => !completedTaskIds.includes(notification.taskId)))
+
+    // Remove completed tasks from notified tasks sets
+    setNotifiedTasks((prev) => {
+      const newTenMinWarning = new Set(prev.tenMinWarning)
+      const newTimeUp = new Set(prev.timeUp)
+
+      completedTaskIds.forEach((id) => {
+        newTenMinWarning.delete(id)
+        newTimeUp.delete(id)
+      })
+
+      return {
+        tenMinWarning: newTenMinWarning,
+        timeUp: newTimeUp,
+      }
+    })
   }
 
   // Handle key press for adding tasks
@@ -162,6 +269,18 @@ export default function TODO() {
       const timeInMilliseconds = days * 24 * 60 * 60 * 1000 + hours * 60 * 60 * 1000 + minutes * 60 * 1000
       const deadline = Date.now() + timeInMilliseconds
 
+      // When setting a new time limit, reset the notification status
+      setNotifiedTasks((prev) => {
+        const newTenMinWarning = new Set(prev.tenMinWarning)
+        const newTimeUp = new Set(prev.timeUp)
+        newTenMinWarning.delete(timeLimitModal.taskId)
+        newTimeUp.delete(timeLimitModal.taskId)
+        return {
+          tenMinWarning: newTenMinWarning,
+          timeUp: newTimeUp,
+        }
+      })
+
       setTasks(tasks.map((task) => (task.id === timeLimitModal.taskId ? { ...task, timeLimit: deadline } : task)))
 
       // If this was opened from a notification, dismiss the notification
@@ -211,30 +330,76 @@ export default function TODO() {
     setNotifications(notifications.filter((notification) => notification.id !== notificationId))
   }
 
+  // Add 10 minutes to a task
+  const add10Minutes = (taskId) => {
+    // Find the task
+    const task = tasks.find((t) => t.id === taskId)
+    if (!task) return
+
+    // Calculate new deadline
+    const newDeadline = task.timeLimit + 10 * 60 * 1000
+
+    // Update the task
+    setTasks(
+      tasks.map((task) => {
+        if (task.id === taskId) {
+          return {
+            ...task,
+            timeLimit: newDeadline,
+          }
+        }
+        return task
+      }),
+    )
+
+    // Reset notification status for this task
+    setNotifiedTasks((prev) => {
+      const newTenMinWarning = new Set(prev.tenMinWarning)
+      const newTimeUp = new Set(prev.timeUp)
+      newTenMinWarning.delete(taskId)
+      newTimeUp.delete(taskId)
+      return {
+        tenMinWarning: newTenMinWarning,
+        timeUp: newTimeUp,
+      }
+    })
+
+    // Play a sound when adding time
+  }
+
+  // Toggle settings modal
+  const toggleSettings = () => {
+    setSettingsOpen(!settingsOpen)
+  }
+
   return (
     <>
       {/* Fixed button to toggle the todo list with clock animation */}
       <div className="relative">
         <div className="flex items-center">
-        <button
-          onClick={toggleTodoList}
-          className="z-40 text-primary-black p-4 rounded-full hover:bg-gray-200 transition-all"
-          aria-label="Toggle Todo List"
-        >
-          <ClipboardList className="h-6 w-6" />
-        </button>
-        <PointsNumber/>
-        </div>
+          <div>
+          <button
+            onClick={toggleTodoList}
+            className="z-40 text-primary-black p-4 rounded-full hover:bg-gray-300 hover:bg-opacity-20 transition-all"
+            aria-label="Toggle Todo List"
+          >
+            <ClipboardList className="h-6 w-6" />
 
-        {/* Clock animation that appears when there are active tasks with time limits */}
-        {hasActiveTimeLimitTasks && (
-          <div className="absolute -top-1 -right-1 animate-pulse">
+          </button>
+          {hasActiveTimeLimitTasks && (
+          <div className="absolute  top-1 ml-7 animate-pulse">
             <div className="relative">
-              <Clock className="h-5 w-5 text-primary animate-spin-slow" />
+              <Clock className="h-5 w-5 text-primary" />
               <span className="absolute top-0 right-0 h-2 w-2 bg-red-500 rounded-full"></span>
             </div>
           </div>
         )}
+        </div>
+          <PointsNumber/>
+        </div>
+
+        {/* Clock animation that appears when there are active tasks with time limits */}
+        
       </div>
 
       {/* Overlay that appears when todo list is open */}
@@ -322,11 +487,99 @@ export default function TODO() {
             {tasks.some((task) => task.completed) && (
               <button
                 onClick={removeCompletedTasks}
-                className="w-full flex items-center justify-center gap-2 bg-red-500 text-white py-2 rounded-lg hover:bg-red-600"
+                className="w-full flex items-center justify-center gap-2 bg-red-500 text-white py-2 rounded-lg hover:bg-red-600 mb-4"
               >
                 <Trash2 className="h-4 w-4" />
                 Remove Completed Tasks
               </button>
+            )}
+
+            {/* Settings button */}
+            <button
+              onClick={toggleSettings}
+              className="w-full flex items-center justify-center gap-2 bg-gray-200 text-gray-700 py-2 rounded-lg hover:bg-gray-300"
+            >
+              <BellRing className="h-4 w-4" />
+              Timer notification settings
+            </button>
+
+            {/* Settings panel */}
+            {settingsOpen && (
+              <div className="mt-4 p-4 border rounded-lg bg-gray-50">
+                <h3 className="font-medium mb-3">Timer notification settings</h3>
+
+                {/* Notification timing */}
+                <div className="mb-4">
+                  <div className="flex items-center justify-between mb-2">
+                    <label className="text-sm font-medium text-gray-700">Notifications</label>
+                    <div className="relative inline-block w-10 mr-2 align-middle select-none">
+                      <input
+                        type="checkbox"
+                        checked={notificationsEnabled}
+                        onChange={() => setNotificationsEnabled(!notificationsEnabled)}
+                        className="sr-only"
+                        id="toggle-notifications"
+                      />
+                      <label
+                        htmlFor="toggle-notifications"
+                        className={`block overflow-hidden h-6 rounded-full cursor-pointer ${notificationsEnabled ? "bg-primary" : "bg-gray-300"}`}
+                      >
+                        <span
+                          className={`block h-6 w-6 rounded-full bg-white shadow transform transition-transform ${notificationsEnabled ? "translate-x-4" : "translate-x-0"}`}
+                        ></span>
+                      </label>
+                    </div>
+                  </div>
+
+                  {notificationsEnabled && (
+                    <div className="flex items-center">
+                      <label className="text-sm text-gray-600 mr-2">Show notification</label>
+                      <input
+                        type="number"
+                        min="1"
+                        max="60"
+                        value={notificationMinutes}
+                        onChange={(e) =>
+                          setNotificationMinutes(Math.max(1, Math.min(60, Number.parseInt(e.target.value) || 10)))
+                        }
+                        className="w-16 px-2 py-1 border rounded text-center"
+                      />
+                      <span className="text-sm text-gray-600 ml-2">minutes before deadline</span>
+                    </div>
+                  )}
+                </div>
+
+                {/* Sound toggle */}
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center">
+                    <label className="text-sm font-medium text-gray-700 mr-2">Notification Sound</label>
+                    {soundEnabled ? (
+                      <Volume2 className="h-4 w-4 text-gray-500" />
+                    ) : (
+                      <VolumeX className="h-4 w-4 text-gray-500" />
+                    )}
+                  </div>
+                  <div className="relative inline-block w-10 mr-2 align-middle select-none">
+                    <input
+                      type="checkbox"
+                      checked={soundEnabled}
+                      onChange={() => setSoundEnabled(!soundEnabled)}
+                      className="sr-only"
+                      id="toggle-sound"
+                    />
+                    <label
+                      htmlFor="toggle-sound"
+                      className={`block overflow-hidden h-6 rounded-full cursor-pointer ${soundEnabled ? "bg-primary" : "bg-gray-300"}`}
+                    >
+                      <span
+                        className={`block h-6 w-6 rounded-full bg-white shadow transform transition-transform ${soundEnabled ? "translate-x-4" : "translate-x-0"}`}
+                      ></span>
+                    </label>
+                  </div>
+                </div>
+
+                
+              </div>
             )}
           </div>
         </div>
@@ -440,7 +693,11 @@ export default function TODO() {
           >
             <div className="flex items-center mb-2">
               <Bell className="h-5 w-5 text-red-500 mr-2" />
-              <h3 className="font-bold text-lg">Time's up!</h3>
+              <h3 className="font-bold text-lg">
+                {notification.isEarlyWarning
+                  ? `${notificationMinutes} minute${notificationMinutes !== 1 ? "s" : ""} left!`
+                  : "Time's up!"}
+              </h3>
               <button
                 onClick={() => dismissNotification(notification.id)}
                 className="ml-auto text-gray-500 hover:text-gray-700"
@@ -453,28 +710,20 @@ export default function TODO() {
 
             <div className="flex justify-between gap-2">
               <button
-                onClick={() => prolongTimeLimit(notification.taskId)}
+                onClick={() => dismissNotification(notification.id)}
+                className="flex-1 px-2 py-1 bg-gray-500 text-white rounded-md hover:bg-gray-600 text-sm"
+              >
+                Close
+              </button>
+              <button
+                onClick={() => {
+                  // Add 10 minutes to the task's time limit
+                  add10Minutes(notification.taskId)
+                  dismissNotification(notification.id)
+                }}
                 className="flex-1 px-2 py-1 bg-blue-500 text-white rounded-md hover:bg-blue-600 text-sm"
               >
-                Prolong Limit
-              </button>
-              <button
-                onClick={() => {
-                  toggleTask(notification.taskId)
-                  dismissNotification(notification.id)
-                }}
-                className="flex-1 px-2 py-1 bg-green-500 text-white rounded-md hover:bg-green-600 text-sm"
-              >
-                Completed
-              </button>
-              <button
-                onClick={() => {
-                  removeTask(notification.taskId)
-                  dismissNotification(notification.id)
-                }}
-                className="flex-1 px-2 py-1 bg-red-500 text-white rounded-md hover:bg-red-600 text-sm"
-              >
-                Delete
+                +10 min.
               </button>
             </div>
           </div>
@@ -483,4 +732,3 @@ export default function TODO() {
     </>
   )
 }
-

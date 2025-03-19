@@ -14,8 +14,14 @@
     "@heroui/react": "^2.7.4",
     "@internationalized/date": "^3.7.0",
     "@radix-ui/react-scroll-area": "^1.2.3",
+    "@radix-ui/react-select": "^2.1.6",
     "autoprefixer": "^10.4.20",
+    "class-variance-authority": "^0.7.1",
+    "clsx": "^2.1.1",
+    "components": "^0.1.0",
     "date-fns": "^4.1.0",
+    "decimal.js-light": "^2.5.1",
+    "deep-equal": "^2.2.3",
     "framer-motion": "^12.4.7",
     "lucide-react": "^0.476.0",
     "next": "15.1.7",
@@ -27,7 +33,10 @@
     "react-datepicker": "^8.1.0",
     "react-dom": "^19.0.0",
     "react-h5-audio-player": "^3.10.0-rc.1",
-    "subtitles-parser-vtt": "^0.1.0"
+    "recharts": "^2.15.1",
+    "subtitles-parser-vtt": "^0.1.0",
+    "tailwind-merge": "^3.0.2",
+    "tailwindcss-animate": "^1.0.7"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3",
@@ -36,6 +45,10 @@
     "eslint": "^9",
     "eslint-config-next": "15.1.7",
     "postcss": "^8.5.3",
-    "tailwindcss": "^3.4.17"
+    "tailwindcss": "^3.4.17",
+    "typescript": "5.7.3"
+  },
+  "overrides": {
+    "react-is": "^19.0.0-rc-69d4b800-20241021"
   }
 }

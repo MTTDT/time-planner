@@ -1,5 +1,4 @@
 "use client";
-
 import { format, getDay, parse, startOfWeek, setHours, setMinutes } from "date-fns";
 import React, { useState } from "react";
 import { Calendar, dateFnsLocalizer } from "react-big-calendar";
@@ -8,6 +7,7 @@ import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import enUS from 'date-fns/locale/en-US';
 import "../globals.css";
+import NotesEditor from './NotesEditor'; // Import NotesEditor component
 
 const locales = {
     "en-US": enUS
@@ -27,7 +27,8 @@ function CalendarTriple() {
     const [newEvent, setNewEvent] = useState({ 
         title: "", 
         start: null, 
-        end: null 
+        end: null,
+        notes: "" // Add notes field
     });
     const [allEvents, setAllEvents] = useState(events);
     const [selectedDate, setSelectedDate] = useState(null);
@@ -35,8 +36,10 @@ function CalendarTriple() {
     const [editForm, setEditForm] = useState({
         title: "",
         start: null,
-        end: null
+        end: null,
+        notes: "" // Add notes field
     });
+    const [isNotesEditorOpen, setIsNotesEditorOpen] = useState(false);
 
     const handleSelectSlot = ({ start }) => {
         const currentHour = new Date().getHours();
@@ -89,21 +92,8 @@ function CalendarTriple() {
             return;
         }
 
-        // Check for time clash
-        // for (let i = 0; i < allEvents.length; i++) {
-        //     const d1 = new Date(allEvents[i].start);
-        //     const d2 = new Date(newEvent.start);
-        //     const d3 = new Date(allEvents[i].end);
-        //     const d4 = new Date(newEvent.end);
-            
-        //     if (((d1 <= d2) && (d2 <= d3)) || ((d1 <= d4) && (d4 <= d3))) {
-        //         alert("Time slot is already booked!");
-        //         return;
-        //     }
-        // }
-        
         setAllEvents([...allEvents, newEvent]);
-        setNewEvent({ title: "", start: "", end: "" }); // Reset form
+        setNewEvent({ title: "", start: "", end: "", notes: "" }); // Reset form
     }
 
     const handleEventDoubleClick = (event) => {
@@ -111,7 +101,8 @@ function CalendarTriple() {
         setEditForm({
             title: event.title,
             start: new Date(event.start),
-            end: new Date(event.end)
+            end: new Date(event.end),
+            notes: event.notes || "" // Add notes field
         });
     };
 
@@ -134,13 +125,32 @@ function CalendarTriple() {
         setEditForm({
             title: "",
             start: null,
-            end: null
+            end: null,
+            notes: "" // Add notes field
         });
     };
 
     const handleDeleteEvent = () => {
         setAllEvents(allEvents.filter(event => event !== editingEvent));
         handleCancelEdit();
+    };
+
+    const handleOpenNotesEditor = () => {
+        setIsNotesEditorOpen(true);
+    };
+
+    const handleSaveNotes = (notes) => {
+        setEditForm({ ...editForm, notes });
+        setIsNotesEditorOpen(false);
+    };
+
+    const handleCancelNotes = () => {
+        setIsNotesEditorOpen(false);
+    };
+
+    const handleDeleteNotes = () => {
+        setEditForm({ ...editForm, notes: "" });
+        setIsNotesEditorOpen(false);
     };
 
     const dayPropGetter = (date) => {
@@ -252,6 +262,12 @@ function CalendarTriple() {
                                 minTime={editForm.start}
                                 maxTime={setHours(new Date(), 23)}
                             />
+                            <button
+                                onClick={handleOpenNotesEditor}
+                                className="px-4 py-2 bg-yellow-500 text-white rounded-lg hover:bg-yellow-600"
+                            >
+                                Open Notes
+                            </button>
                             <div className="flex justify-end gap-2 mt-6">
                                 <button
                                     onClick={handleDeleteEvent}
@@ -273,6 +289,18 @@ function CalendarTriple() {
                                 </button>
                             </div>
                         </div>
+                    </div>
+                </div>
+            )}
+            {isNotesEditorOpen && (
+                <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center">
+                    <div className="bg-white p-6 rounded-lg shadow-xl w-full max-w-md">
+                        <NotesEditor
+                            notes={editForm.notes}
+                            onSave={handleSaveNotes}
+                            onCancel={handleCancelNotes}
+                            onDelete={handleDeleteNotes}
+                        />
                     </div>
                 </div>
             )}

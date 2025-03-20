@@ -36,7 +36,7 @@ body {
 
 .dark {
   --background: #121212; /* Black background */
-  --foreground: #ffffff; /* White text */
+  --foreground: #121212; /* White text */
   --menu-bg: #1e1e1e; /* Dark gray menu background */
   --text-color: #ffffff; /* White text color */
   --border-color: #333333; /* Dark gray border */
@@ -341,9 +341,9 @@ ul li:hover { /*CIA YRA PING IR HOME ABOUT*/
 .add-button {
   padding: 0.5rem 1rem;
   background-color: var(--foreground);
-  color: white;
   border: none;
   border-radius: 0.375rem;
+  border-width: 3px;
   cursor: pointer;
   transition: background-color 0.2s;
 }

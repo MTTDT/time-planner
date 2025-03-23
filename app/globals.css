@@ -36,7 +36,7 @@ body {
 
 .dark {
   --background: #121212; /* Black background */
-  --foreground: #121212; /* White text */
+  --foreground: #ffffff; /* White text */
   --menu-bg: #1e1e1e; /* Dark gray menu background */
   --text-color: #ffffff; /* White text color */
   --border-color: #333333; /* Dark gray border */

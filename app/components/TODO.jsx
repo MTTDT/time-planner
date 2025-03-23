@@ -433,6 +433,7 @@ export default function TODO() {
               <button
                 onClick={addTask}
                 className="bg-primary text-primary-foreground px-4 py-2 rounded-r-lg hover:bg-primary/90"
+                data-testid="add-task-button"
               >
                 <PlusCircle className="h-5 w-5" />
               </button>

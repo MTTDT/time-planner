@@ -31,6 +31,7 @@ function CalendarTriple() {
         notes: "" // Add notes field
     });
     const [allEvents, setAllEvents] = useState(events);
+    
     const [selectedDate, setSelectedDate] = useState(null);
     const [editingEvent, setEditingEvent] = useState(null);
     const [editForm, setEditForm] = useState({

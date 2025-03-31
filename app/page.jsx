@@ -18,14 +18,22 @@ export default function Home() {
     document.documentElement.classList.add(theme);
 
     // Apply primary and secondary colors globally
-    document.documentElement.style.setProperty("--primary-color", themeColor);
+    if (theme === "light") {
+      document.documentElement.style.setProperty("--primary-color", themeColor);
+    } else {
+      document.documentElement.style.setProperty("--primary-color", "#000000"); // Black background for dark mode
+    }
     document.documentElement.style.setProperty("--secondary-color", secondaryColor);
   }, [theme, themeColor, secondaryColor]); // Ensure the dependency array is consistent
 
   return (
     <div
       className={`${theme} w-screen flex relative`}
-      style={{ backgroundColor: themeColor, minHeight: "100vh", color: secondaryColor }}
+      style={{
+        backgroundColor: theme === "dark" ? "#000000" : themeColor, // Black for dark mode
+        minHeight: "100vh",
+        color: secondaryColor,
+      }}
     >
       <Sidebar onToggle={setIsSidebarOpen} />
       <div className={`flex-1 transition-all duration-300 ${isSidebarOpen ? "pl-48" : "pl-16"}`}>

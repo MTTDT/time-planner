@@ -13,6 +13,10 @@ export default function Settings() {
     // Dynamically update CSS variables in :root
     const root = document.documentElement;
     root.style.setProperty("--primary-color", newColor);
+
+    // Calculate a slightly darker shade for .rbc-today
+    const darkerColor = darkenColor(newColor, 0.1); // Darken by 10%
+    root.style.setProperty("--rbc-today-bg", darkerColor);
   };
 
   const handleSecondaryColorChange = (e) => {
@@ -36,6 +40,16 @@ export default function Settings() {
     const g = parseInt(hex.slice(3, 5), 16);
     const b = parseInt(hex.slice(5, 7), 16);
     return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+  };
+
+  // Helper function to darken a HEX color
+  const darkenColor = (hex, amount) => {
+    const r = Math.max(0, parseInt(hex.slice(1, 3), 16) - Math.round(255 * amount));
+    const g = Math.max(0, parseInt(hex.slice(3, 5), 16) - Math.round(255 * amount));
+    const b = Math.max(0, parseInt(hex.slice(5, 7), 16) - Math.round(255 * amount));
+    return `#${r.toString(16).padStart(2, "0")}${g.toString(16).padStart(2, "0")}${b
+      .toString(16)
+      .padStart(2, "0")}`;
   };
 
   return (

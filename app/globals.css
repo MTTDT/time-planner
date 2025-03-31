@@ -429,6 +429,10 @@ ul li:hover { /*CIA YRA PING IR HOME ABOUT*/
   background-color: #333333 !important; /* Dark gray background for dark mode */
   color: white; /* White text for dark mode */
 }
+.rbc-today {
+  background-color: var(--rbc-today-bg, #f0f0f0) !important; /* Default to light gray if not set */
+  color: var(--text-color); /* Use text color for text */
+}
 
 @layer base {
   :root {

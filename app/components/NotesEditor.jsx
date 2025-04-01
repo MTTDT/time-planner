@@ -37,7 +37,7 @@ function Editor({ onChange, initialValue }) {
     
     if (initialValue) {
       Promise.resolve().then(() => {
-        const initialState = editor.parseEditorState(JSON.parse(initialValue));
+        const initialState = editor.parseEditorState(initialValue);
         editor.setEditorState(initialState);
       });
     }

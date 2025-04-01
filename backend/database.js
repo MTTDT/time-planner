@@ -4,10 +4,10 @@ import dotenv from 'dotenv';
 dotenv.config();
 
 const pool = mysql.createPool({
-    host: 'localhost',
-    user: 'root',       // default XAMPP username
-    password: '',       // default XAMPP password (empty)
-    database: 'timedb' // your database name
+    host: process.env.DB_HOST,
+    user: process.env.DB_USER,
+    password: process.env.DB_PASSWORD,
+    database: process.env.DB_DATABASE
 }).promise();
 
 //----------------------------------------------

@@ -1,17 +1,24 @@
 import express from 'express';
 import cors from 'cors';
+import authRouter from './routes/authRoutes.js';
 
 import { getEvents, getEvent, createEvent, updateEvent, deleteEvent, getTodos, getTodo, createTodo, deleteCheckedTodos, getNotes, getNote, createNote, updateNote, deleteNote, getComments, getComment, createComment, updateComment, deleteComment, getUsers, getUser, createUser, updateUser, deleteUser } from './database.js';
 
 const app = express();
 
-// Configure CORS
 app.use(cors({
     origin: 'http://localhost:3000',
-    credentials: true,
-}));
+    methods: ['GET', 'POST', 'PUT', 'DELETE'],
+    allowedHeaders: ['Content-Type', 'Authorization'],
+}))
 
-app.use(express.json());
+app.use(express.json())
+
+app.use('/auth', authRouter) 
+
+app.get('/', (req, res) => {
+    console.log("req.body")
+})
 
 //----------------------------------------------
 // calendar_event
@@ -317,6 +324,6 @@ app.use((err, req, res, next) => {
 });
 
 app.listen(8080, () => {
-    console.log('Server is running on port 8080');
+    console.log('Server is running on port http://localhost:8080');
 });
 

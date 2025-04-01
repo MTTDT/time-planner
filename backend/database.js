@@ -195,4 +195,63 @@ export async function deleteComment(id) {
         throw error;
     }
 }
+//----------------------------------------------
+// user
+//----------------------------------------------
+export async function getUsers() {
+    try {
+        const [rows] = await pool.query('SELECT * FROM app_user');
+        return rows;
+    } catch (error) {
+        console.error('Error fetching users:', error);
+        throw error;
+    }
+}
+
+export async function getUser(login_name) {
+    try {
+        console.log(`Querying database for user: ${login_name}`); // Debug log
+        const [rows] = await pool.query(
+            'SELECT * FROM app_user WHERE LOWER(login_name) = LOWER(?)',
+            [login_name]
+        );
+        console.log(`Query result: ${JSON.stringify(rows)}`); // Debug log
+        return rows[0];
+    } catch (error) {
+        console.error('Error fetching user from database:', error);
+        throw error;
+    }
+}
+
+export async function createUser({ login_name, password }) {
+    try {
+        await pool.query('INSERT INTO app_user (login_name, password) VALUES (?, ?)', [login_name, password]);
+        return getUser(login_name);
+    } catch (error) {
+        console.error('Error creating user:', error);
+        throw error;
+    }
+}
+
+export async function updateUser(login_name, { password }) {
+    try {
+        await pool.query('UPDATE app_user SET password = ? WHERE login_name = ?', [password, login_name]);
+        return result.affectedRows > 0 ? getUser(login_name) : null;
+        } catch (error) {
+        console.error('Error updating user:', error);
+        throw error;
+    }
+}
+
+export async function deleteUser(login_name) {
+    try {
+        const user = await getUser(login_name);
+        if (!user) return null;
+        const [result] = await pool.query('DELETE FROM app_user WHERE login_name = ?', [login_name]);        
+        return result.affectedRows > 0 ? user : null; // Return the deleted user or null if not found
+    } catch (error) {
+        console.error('Error deleting user:', error);
+        throw error;
+    }
+}
 

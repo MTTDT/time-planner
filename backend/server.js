@@ -1,11 +1,16 @@
 import express from 'express';
 import cors from 'cors';
 
-import { getEvents, getEvent, createEvent, updateEvent, deleteEvent, getTodos, getTodo, createTodo, deleteCheckedTodos, getNotes, getNote, createNote, updateNote, deleteNote, getComments, getComment, createComment, updateComment, deleteComment } from './database.js';
+import { getEvents, getEvent, createEvent, updateEvent, deleteEvent, getTodos, getTodo, createTodo, deleteCheckedTodos, getNotes, getNote, createNote, updateNote, deleteNote, getComments, getComment, createComment, updateComment, deleteComment, getUsers, getUser, createUser, updateUser, deleteUser } from './database.js';
 
 const app = express();
 
-app.use(cors({ origin: 'http://localhost:3000' }));
+// Configure CORS
+app.use(cors({
+    origin: 'http://localhost:3000',
+    credentials: true,
+}));
+
 app.use(express.json());
 
 //----------------------------------------------
@@ -227,6 +232,82 @@ app.delete("/comments/:id", async (req, res) => {
         res.status(500).json({ error: 'An error occurred while deleting the comment' });
     }
 });
+
+//----------------------------------------------
+// user
+//----------------------------------------------
+app.get("/app_user", async (req, res) => {
+    try {
+        const users = await getUsers();
+        res.json(users);
+    } catch (error) {
+        console.error('Error fetching users:', error);
+        res.status(500).json({ error: 'An error occurred while fetching users' });
+    }
+});
+
+app.get("/app_user/:login_name", async (req, res) => {
+    try {
+        const login_name = req.params.login_name;
+        console.log(`Fetching user with login_name: ${login_name}`); 
+        const user = await getUser(login_name);
+        if (!user) {
+            console.log(`User not found: ${login_name}`);
+            return res.status(404).json({ error: 'User not found' });
+        }
+        res.json(user);
+    } catch (error) {
+        console.error('Error fetching user:', error);
+        res.status(500).json({ error: 'An error occurred while fetching the user' });
+    }
+});
+
+app.post("/app_user", async (req, res) => {
+    try {
+        const { login_name, password } = req.body;
+        if (!login_name || !password) {
+            return res.status(400).json({ error: 'Username and password are required' });
+        }
+        const user = await createUser({ login_name, password });
+        res.status(201).json(user);
+    } catch (error) {
+        console.error('Error creating user:', error);
+        res.status(500).json({ error: 'An error occurred while creating the user' });
+    }
+});
+
+app.put("/app_user/:login_name", async (req, res) => {
+    try {
+        const login_name = req.params.login_name;
+        const { password } = req.body;
+        if (!password) {
+            return res.status(400).json({ error: 'Password is required' });
+        }
+        const user = await updateUser(login_name, { password });
+        if (!user) {
+            return res.status(404).json({ error: 'User not found' });
+        }
+        res.json(user);
+    } catch (error) {
+        console.error('Error updating user:', error);
+        res.status(500).json({ error: 'An error occurred while updating the user' });
+    }
+});
+
+app.delete("/app_user/:login_name", async (req, res) => {
+    try {
+        const login_name = req.params.login_name;
+        const user = await deleteUser(login_name);
+        if (!user) {
+            return res.status(404).json({ error: 'User not found' });
+        }
+        res.json(user);
+    } catch (error) {
+        console.error('Error deleting user:', error);
+        res.status(500).json({ error: 'An error occurred while deleting the user' });
+    }
+});
+
 
 // error handler
 app.use((err, req, res, next) => {

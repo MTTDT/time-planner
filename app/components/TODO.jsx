@@ -452,6 +452,7 @@ export default function TODO() {
                     }`}
                   >
                     <button
+                     aria-label="Toggle Task"
                       onClick={() => toggleTask(task.id)}
                       className={`mr-2 flex-shrink-0 h-5 w-5 rounded-full border ${
                         task.completed ? "border-green-500 bg-green-500 text-white" : "border-red-500"
@@ -475,7 +476,7 @@ export default function TODO() {
                       >
                         Time Limit
                       </button>
-                      <button onClick={() => removeTask(task.id)} className="ml-2 text-gray-500 hover:text-gray-700">
+                      <button onClick={() => removeTask(task.id)} aria-label="Remove Task" className="ml-2 text-gray-500 hover:text-gray-700">
                         <X className="h-4 w-4" />
                       </button>
                     </div>

@@ -9,6 +9,8 @@
   --hover-bg: rgba(0, 188, 212, 0.1); /* Light cyan hover background */
   --shadow-color: rgba(0, 188, 212, 0.2); /* Cyan shadow color */
   --hover-shadow: 0 4px 8px rgba(0, 188, 212, 0.5); /* Cyan hover shadow */
+  --primary-color: #ffffff; /* Default primary color for light mode */
+  --secondary-color: #00bcd4; /* Default secondary color */
 }
 
 * {
@@ -23,8 +25,8 @@ body {
   height: 100%;
   overflow-x: hidden;
   font-family: 'Arial', 'Helvetica', sans-serif;
-  background-color: var(--background);
-  color: var(--foreground);
+  background-color: var(--primary-color); /* Use primary color for the background */
+  color: var(--secondary-color); /* Use secondary color for text */
 }
 
 @media (prefers-color-scheme: light) {
@@ -43,6 +45,14 @@ body {
   --hover-bg: rgba(255, 255, 255, 0.1); /* Light gray hover background */
   --shadow-color: rgba(0, 0, 0, 0.5); /* Dark shadow color */
   --hover-shadow: 0 4px 8px rgba(51, 51, 51, 0.5); /* Gray hover shadow */
+  --primary-color: #000000; /* Black background for dark mode */
+  --secondary-color: #00bcd4; /* Secondary color remains dynamic */
+}
+
+.dark body {
+  --background: #0e0d0d; /* Black background for dark mode */
+  background-color: var(--primary-color); /* Black background for dark mode */
+  color: var(--secondary-color); /* Secondary color for text */
 }
 
 .top-menu {
@@ -418,6 +428,10 @@ ul li:hover { /*CIA YRA PING IR HOME ABOUT*/
 .dark .rbc-today {
   background-color: #333333 !important; /* Dark gray background for dark mode */
   color: white; /* White text for dark mode */
+}
+.rbc-today {
+  background-color: var(--rbc-today-bg, #f0f0f0) !important; /* Default to light gray if not set */
+  color: var(--text-color); /* Use text color for text */
 }
 
 /*register*/

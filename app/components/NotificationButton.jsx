@@ -35,5 +35,3 @@ const NotificationButton = () => {
 };
 
 export default NotificationButton;
-
-

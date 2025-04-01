@@ -133,11 +133,11 @@ export default function NotificationContainer({ newNotification }) {
   }
 
   return (
-    <div className="relative">
+    <div className="relative ">
       {/* Bell icon with notification count badge */}
       <Popover open={isOpen} onOpenChange={setIsOpen}>
         <PopoverTrigger asChild>
-          <Button variant="ghost" size="icon" className="relative">
+          <Button  size="icon" className="relative bg-transparent">
             <Bell className="h-5 w-5" />
             {unreadCount > 0 && (
               <Badge

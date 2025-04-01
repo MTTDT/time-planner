@@ -56,6 +56,7 @@ app.put("/calendar_event/:id", async (req, res) => {
 });
 
 app.delete("/calendar_event/:id", async (req, res) => {
+    console.log("deleting")
     try {
         const id = req.params.id;
         const event = await deleteEvent(id);

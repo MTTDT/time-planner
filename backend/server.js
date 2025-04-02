@@ -1,7 +1,7 @@
 import express from 'express';
 import cors from 'cors';
 
-import { getEvents, getEvent, createEvent, updateEvent, deleteEvent, getTodos, getTodo, createTodo, deleteCheckedTodos, getNotes, getNote, createNote, updateNote, deleteNote, getComments, getComment, createComment, updateComment, deleteComment, getUsers, getUser, createUser, updateUser, deleteUser } from './database.js';
+import { getEvents, getEvent, createEvent, updateEvent, deleteEvent, getTodos, getTodo, createTodo, deleteTodo, updateTodo, getNotes, getNote, createNote, updateNote, deleteNote, getComments, getComment, createComment, updateComment, deleteComment, getUsers, getUser, createUser, updateUser, deleteUser } from './database.js';
 
 const app = express();
 
@@ -110,7 +110,7 @@ app.post("/todo_item", async (req, res) => {
 app.delete("/todo_item/:id", async (req, res) => {
     try {
         const id = req.params.id;
-        const item = await deleteCheckedTodos(id);
+        const item = await deleteTodo(id);
         res.json(item);
     } catch (error) {
         console.error(error);
@@ -118,6 +118,16 @@ app.delete("/todo_item/:id", async (req, res) => {
     }
 });
 
+app.put("/todo_item/:id", async (req, res) => {
+    try {
+        const id = req.params.id;
+        const updatedTodo = await updateTodo(id, req.body);
+        res.json(updatedTodo);
+    } catch (error) {
+        console.error(error);
+        res.status(404).json({ error: error.message });
+    }
+});
 //----------------------------------------------
 // note
 //----------------------------------------------

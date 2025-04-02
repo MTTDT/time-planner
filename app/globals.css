@@ -459,13 +459,13 @@ form {
   padding-bottom: 1rem;
 }
 
-a, a:visited {
+/* a, a:visited {
   color: #fff;
-}
+} */
 
 input[type="text"],
 input[type="password"],
-button,
+/* button, */
 textarea {
 font-family: 'Nunito', sans-serif;
 font-size: 22px;

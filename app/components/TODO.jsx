@@ -18,6 +18,7 @@ import {
  } from "lucide-react"
 import PointsNumber from "./PointsNumber"
 import { getPoints, addPoint, subscribe, clearPoints } from "./pointsStorage";
+import { api_add_todo_item, api_delete_todo_item, api_get_todo_item_by_id, api_update_todo_item, api_get_all_todo_items } from "../api_req";
 
 
 export default function TODO() {
@@ -36,6 +37,8 @@ export default function TODO() {
     timeUp: new Set(),
   })
 
+  
+
   // Settings state
   const [settingsOpen, setSettingsOpen] = useState(false)
   const [notificationMinutes, setNotificationMinutes] = useState(10)
@@ -50,6 +53,27 @@ export default function TODO() {
     audio.play();
   }
 
+  useEffect(() => {
+    const fetchTodos = async () => {
+      try {
+        const todos = await api_get_all_todo_items();
+        // Transform API data to match your local format
+        const transformedTodos = todos.map(todo => ({
+          id: todo.id.toString(),
+          text: todo.title,
+          completed: todo.is_checked,
+          timeLimit: todo.end_date && todo.end_time 
+            ? new Date(`${todo.end_date}T${todo.end_time}`).getTime()
+            : null
+        }));
+        setTasks(transformedTodos);
+      } catch (error) {
+        console.error("Failed to fetch todos:", error);
+      }
+    };
+
+    fetchTodos();
+  }, []);
   // Update current time every second to refresh time displays
   useEffect(() => {
     const interval = setInterval(() => {
@@ -138,86 +162,122 @@ export default function TODO() {
   const hasActiveTimeLimitTasks = tasks.some((task) => task.timeLimit && !task.completed)
 
   // Add a new task
-  const addTask = () => {
+  const addTask = async() => {
     if (newTaskText.trim() === "") return
 
-    const newTask = {
-      id: Date.now().toString(),
-      text: newTaskText,
-      completed: false,
-      timeLimit: null,
+    try {
+      const newTodo = await api_add_todo_item({
+        title: newTaskText,
+        is_checked: false,
+        start_date: new Date().toISOString().split('T')[0], // Current date
+        start_time: new Date().toTimeString().split(' ')[0], // Current time
+        end_date: null,
+        end_time: null,
+        fk_dashboard: 1, // Update with your actual dashboard ID
+        fk_app_user: "Stepas"  // Update with your actual user ID
+      });
+  
+      setTasks([...tasks, {
+        id: newTodo.id.toString(),
+        text: newTodo.title,
+        completed: newTodo.is_checked,
+        timeLimit: null
+      }]);
+      setNewTaskText("");
+    } catch (error) {
+      console.error("Failed to add todo:", error);
     }
-
-    setTasks([...tasks, newTask])
-    setNewTaskText("")
   }
 
 
   // Toggle task completion status
-  const toggleTask = (id) => {
+  const toggleTask = async(id) => {
 
- 
-
-  // Find the current task state before updating
-  const currentTask = tasks.find((task) => task.id === id)
-  const isCurrentlyCompleted = currentTask?.completed
-
-  // Update tasks
-  setTasks(tasks.map((task) => (task.id === id ? { ...task, completed: !task.completed } : task)))
-
-  // Remove notification if task is completed
-  if (tasks.find((task) => task.id === id)?.completed === false) {
-    setNotifications(notifications.filter((notification) => notification.taskId !== id))
-  }
-
-  // Only add points if the task is being marked as completed (not uncompleted)
-  if (isCurrentlyCompleted === false) {
-    console.log("Adding point...")
-    addPoint()
-  }
-  }
-
-  const removeTask = (id) => {
-    setTasks(tasks.filter((task) => task.id !== id))
-    // Remove any notifications for this task
-    setNotifications(notifications.filter((notification) => notification.taskId !== id))
-
-    // Remove from notified tasks sets
-    setNotifiedTasks((prev) => {
-      const newTenMinWarning = new Set(prev.tenMinWarning)
-      const newTimeUp = new Set(prev.timeUp)
-      newTenMinWarning.delete(id)
-      newTimeUp.delete(id)
-      return {
-        tenMinWarning: newTenMinWarning,
-        timeUp: newTimeUp,
+    const currentTask = tasks.find((task) => task.id === id);
+    const isCurrentlyCompleted = currentTask?.completed;
+  
+    try {
+      // Update in the API first
+      await api_update_todo_item(id, {
+        title: currentTask.text,
+        is_checked: !isCurrentlyCompleted,
+        start_date: new Date().toISOString().split('T')[0],
+        start_time: new Date().toTimeString().split(' ')[0],
+        end_date: currentTask.timeLimit ? new Date(currentTask.timeLimit).toISOString().split('T')[0] : null,
+        end_time: currentTask.timeLimit ? new Date(currentTask.timeLimit).toTimeString().split(' ')[0] : null,
+        fk_dashboard: 1, // Update with your actual dashboard ID
+        fk_app_user: "Stepas"  // Update with your actual user ID
+      });
+  
+      // Then update local state
+      setTasks(tasks.map((task) => 
+        task.id === id ? { ...task, completed: !task.completed } : task
+      ));
+  
+      // Remove notification if task is completed
+      if (!isCurrentlyCompleted) {
+        setNotifications(notifications.filter((notification) => notification.taskId !== id));
+        console.log("Adding point...");
+        addPoint();
       }
-    })
+    } catch (error) {
+      console.error("Failed to update todo:", error);
+    }
   }
+
+  const removeTask = async (id) => {
+    try {
+      await api_delete_todo_item(id);
+      setTasks(tasks.filter((task) => task.id !== id));
+      setNotifications(notifications.filter((notification) => notification.taskId !== id));
+      
+      setNotifiedTasks((prev) => {
+        const newTenMinWarning = new Set(prev.tenMinWarning);
+        const newTimeUp = new Set(prev.timeUp);
+        newTenMinWarning.delete(id);
+        newTimeUp.delete(id);
+        return {
+          tenMinWarning: newTenMinWarning,
+          timeUp: newTimeUp,
+        };
+      });
+    } catch (error) {
+      console.error("Failed to delete todo:", error);
+    }
+  };
 
   // Remove all completed tasks
-  const removeCompletedTasks = () => {
-    const completedTaskIds = tasks.filter((task) => task.completed).map((task) => task.id)
-    setTasks(tasks.filter((task) => !task.completed))
-    // Remove notifications for completed tasks
-    setNotifications(notifications.filter((notification) => !completedTaskIds.includes(notification.taskId)))
-
-    // Remove completed tasks from notified tasks sets
-    setNotifiedTasks((prev) => {
-      const newTenMinWarning = new Set(prev.tenMinWarning)
-      const newTimeUp = new Set(prev.timeUp)
-
-      completedTaskIds.forEach((id) => {
-        newTenMinWarning.delete(id)
-        newTimeUp.delete(id)
-      })
-
-      return {
-        tenMinWarning: newTenMinWarning,
-        timeUp: newTimeUp,
-      }
-    })
-  }
+  const removeCompletedTasks = async () => {
+    const completedTasks = tasks.filter((task) => task.completed);
+    
+    try {
+      // Delete all completed tasks from API
+      await Promise.all(
+        completedTasks.map(task => api_delete_todo_item(task.id))
+      );
+      
+      // Update local state
+      setTasks(tasks.filter((task) => !task.completed));
+      setNotifications(notifications.filter((n) => 
+        !completedTasks.some(t => t.id === n.taskId)
+      ));
+      
+      setNotifiedTasks((prev) => {
+        const newTenMinWarning = new Set(prev.tenMinWarning);
+        const newTimeUp = new Set(prev.timeUp);
+        completedTasks.forEach(task => {
+          newTenMinWarning.delete(task.id);
+          newTimeUp.delete(task.id);
+        });
+        return {
+          tenMinWarning: newTenMinWarning,
+          timeUp: newTimeUp,
+        };
+      });
+    } catch (error) {
+      console.error("Failed to delete completed todos:", error);
+    }
+  };
 
   // Handle key press for adding tasks
   const handleKeyPress = (e) => {
@@ -263,34 +323,52 @@ export default function TODO() {
     setTimeLimitModal({ isOpen: false, taskId: null, fromNotification: false })
   }
 
-  // Set time limit for a task
-  const setTimeLimit = () => {
+  const setTimeLimit = async () => {
     if (timeLimitModal.taskId) {
-      const timeInMilliseconds = days * 24 * 60 * 60 * 1000 + hours * 60 * 60 * 1000 + minutes * 60 * 1000
-      const deadline = Date.now() + timeInMilliseconds
-
-      // When setting a new time limit, reset the notification status
-      setNotifiedTasks((prev) => {
-        const newTenMinWarning = new Set(prev.tenMinWarning)
-        const newTimeUp = new Set(prev.timeUp)
-        newTenMinWarning.delete(timeLimitModal.taskId)
-        newTimeUp.delete(timeLimitModal.taskId)
-        return {
-          tenMinWarning: newTenMinWarning,
-          timeUp: newTimeUp,
+      const timeInMilliseconds = days * 24 * 60 * 60 * 1000 + 
+                               hours * 60 * 60 * 1000 + 
+                               minutes * 60 * 1000;
+      const deadline = Date.now() + timeInMilliseconds;
+      const deadlineDate = new Date(deadline);
+  
+      try {
+        const task = tasks.find(t => t.id === timeLimitModal.taskId);
+        
+        // Update in API
+        await api_update_todo_item(timeLimitModal.taskId, {
+          title: task.text,
+          is_checked: task.completed,
+          start_date: new Date().toISOString().split('T')[0],
+          start_time: new Date().toTimeString().split(' ')[0],
+          end_date: deadlineDate.toISOString().split('T')[0],
+          end_time: deadlineDate.toTimeString().split(' ')[0],
+          fk_dashboard: 1, // Update with your actual dashboard ID
+          fk_app_user: "Stepas"  // Update with your actual user ID
+        });
+  
+        // Update local state
+        setTasks(tasks.map((task) => 
+          task.id === timeLimitModal.taskId 
+            ? { ...task, timeLimit: deadline } 
+            : task
+        ));
+  
+        setNotifiedTasks((prev) => ({
+          ...prev,
+          tenMinWarning: new Set([...prev.tenMinWarning].filter(id => id !== timeLimitModal.taskId)),
+          timeUp: new Set([...prev.timeUp].filter(id => id !== timeLimitModal.taskId)),
+        }));
+  
+        if (timeLimitModal.fromNotification) {
+          setNotifications(notifications.filter((n) => n.taskId !== timeLimitModal.taskId));
         }
-      })
-
-      setTasks(tasks.map((task) => (task.id === timeLimitModal.taskId ? { ...task, timeLimit: deadline } : task)))
-
-      // If this was opened from a notification, dismiss the notification
-      if (timeLimitModal.fromNotification) {
-        setNotifications(notifications.filter((notification) => notification.taskId !== timeLimitModal.taskId))
+  
+        closeTimeLimitModal();
+      } catch (error) {
+        console.error("Failed to update todo time limit:", error);
       }
-
-      closeTimeLimitModal()
     }
-  }
+  };
 
   // Format time remaining for display
   const formatTimeRemaining = (timeLimit) => {

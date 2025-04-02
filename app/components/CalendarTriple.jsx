@@ -329,6 +329,66 @@ function CalendarTriple() {
         return {};
     };
 
+    const CustomToolbar = (props) => {
+        const formattedLabel = props.label 
+    ? props.label.split(' ')[0].substring(0, 3) + ' ' + props.label.split(' ').slice(1).join(' ')
+    : props.label;
+
+        return (
+          <div className="flex justify-between items-center">
+            {/* Left Group: Today Button */}
+            <div className="flex">
+              <button 
+                type="button" 
+                onClick={() => props.onNavigate("TODAY")} 
+                className="border rounded-xl px-4 py-1 m-1 hover:bg-gray-500 text-xl hover:bg-opacity-30"
+              >
+                Today
+              </button>
+            </div>
+      
+            {/* Center Group: Back, Date Label, Next */}
+            <div className="flex items-center gap-2">
+              <button type="button" onClick={() => props.onNavigate("PREV")} className="border rounded-md px-2 hover:bg-gray-500 hover:bg-opacity-30">
+                {"<"}
+              </button>
+              <span className="rbc-toolbar-label mx-2 font-medium">
+                {formattedLabel}
+              </span>
+              <button type="button" onClick={() => props.onNavigate("NEXT")} className="border rounded-md px-2 hover:bg-gray-500 hover:bg-opacity-30">
+                {">"}
+              </button>
+            </div>
+      
+            {/* Right Group: Day, Week, Month Views */}
+            <div className="flex gap-4 border py-1 px-4 mr-2 rounded-xl ">
+              <button
+                type="button"
+                onClick={() => props.onView("day")}
+                className={`${props.view === "day" ? "bg-gray-500 bg-opacity-10" : ""} hover:bg-gray-500 hover:bg-opacity-30 rounded-xl px-3 py-1`}
+                
+              >
+                Day
+              </button>
+              <button
+                type="button"
+                onClick={() => props.onView("week")}
+                className={`${props.view === "week" ? "bg-gray-500 bg-opacity-10" : ""} hover:bg-gray-500 hover:bg-opacity-30 rounded-xl px-3 py-1`}
+              >
+                Week
+              </button>
+              <button
+                type="button"
+                onClick={() => props.onView("month")}
+                className={`${props.view === "month" ? "bg-gray-500 bg-opacity-10" : ""} hover:bg-gray-500 hover:bg-opacity-30 rounded-xl px-3 py-1`}
+              >
+                Month
+              </button>
+            </div>
+          </div>
+        );
+      };
+
     return (
         <div >
             <div className="max-w-7xl mx-auto">
@@ -387,9 +447,15 @@ function CalendarTriple() {
                                 events={allEvents} 
                                 startAccessor="start" 
                                 endAccessor="end" 
-                                style={{ height: 700 }}
+                                style={{ 
+                                    height: 700,
+                                    "--rbc-grid-color": "#ff5733", // Orange grid
+                                }}
                                 defaultView="week"
                                 views={['month', 'week', 'day']}
+                                components={{
+                                    toolbar: CustomToolbar, // Use your custom toolbar
+                                  }}
                                 selectable={true}
                                 onSelectSlot={handleSelectSlot}
                                 selected={selectedDate}

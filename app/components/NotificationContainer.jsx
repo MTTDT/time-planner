@@ -137,8 +137,8 @@ export default function NotificationContainer({ newNotification }) {
       {/* Bell icon with notification count badge */}
       <Popover open={isOpen} onOpenChange={setIsOpen}>
         <PopoverTrigger asChild>
-          <Button variant="ghost" size="icon" className="relative">
-            <Bell className="h-5 w-5" />
+          <Button size="icon" className="relative bg-transparent hover:bg-gray-600 hover:bg-opacity-20 p-1 rounded-xl">
+            <Bell className="h-5 w-5 " />
             {unreadCount > 0 && (
               <Badge
                 variant="destructive"

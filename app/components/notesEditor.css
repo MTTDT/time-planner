@@ -1,9 +1,9 @@
 .notes-editor-wrapper {
   width: 100%;
-  height: calc(100vh - 40px);
+  height: 100%;
   display: flex;
   justify-content: center;
-  align-items: flex-start;
+  align-items: center;
   padding: 20px;
   box-sizing: border-box;
 }
@@ -13,58 +13,86 @@
   flex-direction: column;
   width: 80vw;
   max-width: 1400px;
-  height: 90vh;
+  height: 80vh;
   margin: 0 auto;
   border: 1px solid #ccc;
-  border-radius: 4px;
-  background: white;
+  border-radius: 8px;
+  background: #fff;
   overflow: hidden;
-  position: absolute;
-  left: 50%;
-  transform: translateX(-50%);
+  position: relative;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  /* Increase padding at the bottom to prevent buttons touching outline */
+  padding-bottom: 100px;  /* Increased from 80px */
 }
 
 .notes-editor-actions {
   display: flex;
   justify-content: flex-end;
-  padding: 12px;
-  gap: 8px;
+  padding: 20px;  /* Increased padding */
+  gap: 12px;
   background: #f8f9fa;
   border-top: 1px solid #ddd;
   width: 100%;
   box-sizing: border-box;
-  position: sticky;
+  position: absolute;
   bottom: 0;
+  left: 0;
   z-index: 10;
+  margin-top: auto;  /* Push to bottom */
 }
 
-.notes-editor-actions button {
+/* Remove outline and add better button styling */
+.notes-editor button {
   padding: 8px 16px;
-  border-radius: 4px;
   border: none;
+  border-radius: 4px;
   cursor: pointer;
   font-weight: 500;
-  min-width: 80px;
-  transition: opacity 0.2s;
+  transition: all 0.2s ease;
 }
 
-.notes-editor-actions button:first-child {
-  background-color: #0d6efd;
+.notes-editor button:hover {
+  opacity: 0.9;
+}
+
+/* Style for Save button */
+.notes-editor button:first-child {
+  background: #3b82f6;
   color: white;
 }
 
-.notes-editor-actions button:nth-child(2) {
-  background-color: #6c757d;
-  color: white;
+/* Style for Cancel/Delete buttons */
+.notes-editor button:not(:first-child) {
+  background: #e5e7eb;
+  color: #374151;
 }
 
-.notes-editor-actions button:last-child {
-  background-color: #dc3545;
-  color: white;
+/* Style for Delete button */
+.delete-button {
+  background: #dc2626 !important;
+  color: white !important;
 }
 
-.notes-editor-actions button:hover {
-  opacity: 0.8;
+/* Remove any unwanted outlines */
+.notes-editor * {
+  outline: none !important;
+}
+
+/* Style for the editor content area */
+.notes-editor-content {
+  flex: 1;
+  padding: 20px;
+  overflow-y: auto;
+}
+
+/* Add padding to title input if you have one */
+.notes-editor input[type="text"] {
+  margin: 20px 20px 0;
+  padding: 8px 12px;
+  border: 1px solid #e5e7eb;
+  border-radius: 4px;
+  font-size: 1.1em;
+  width: calc(100% - 40px);
 }
 
 .editor-container {
@@ -73,9 +101,10 @@
   background: #fff;
   position: relative;
   width: 100%;
-  height: calc(100% - 120px);
+  /* Adjust height to account for increased bottom padding */
+  height: calc(100% - 120px);  /* Increased from 100px */
   flex: 1;
-  overflow: hidden;
+  overflow: auto;
 }
 
 .editor-inner {
@@ -86,7 +115,6 @@
   overflow-y: auto;
   padding-top: 20px;
 }
-
 
 .editor-input {
   height: auto;
@@ -101,7 +129,6 @@
   font-size: 14px; /* Default size */
   color: #000000; /* Default color */
 }
-
 
 .editor-text-bold {
   font-weight: bold !important;
@@ -123,11 +150,9 @@
   text-decoration: underline line-through !important;
 }
 
-
 [data-lexical-text] {
   white-space: pre-wrap;
 }
-
 
 [data-lexical-text][style*="font-size"],
 [data-lexical-text][style*="color"],
@@ -135,13 +160,11 @@
   white-space: pre-wrap;
 }
 
-
 [style*="font-size"][style*="color"],
 [style*="font-size"][style*="font-family"],
 [style*="color"][style*="font-family"] {
   white-space: pre-wrap;
 }
-
 
 .editor-text-bold[style*="font-size"],
 .editor-text-bold[style*="color"],
@@ -158,14 +181,37 @@
   white-space: pre-wrap;
 }
 
-[style*="font-size: 12px"] { font-size: 12px !important; }
-[style*="font-size: 14px"] { font-size: 14px !important; }
-[style*="font-size: 16px"] { font-size: 16px !important; }
-[style*="font-size: 18px"] { font-size: 18px !important; }
-[style*="font-size: 20px"] { font-size: 20px !important; }
-[style*="font-size: 24px"] { font-size: 24px !important; }
-[style*="font-size: 28px"] { font-size: 28px !important; }
-[style*="font-size: 32px"] { font-size: 32px !important; }
+[style*="font-size: 12px"] {
+  font-size: 12px !important;
+}
+
+[style*="font-size: 14px"] {
+  font-size: 14px !important;
+}
+
+[style*="font-size: 16px"] {
+  font-size: 16px !important;
+}
+
+[style*="font-size: 18px"] {
+  font-size: 18px !important;
+}
+
+[style*="font-size: 20px"] {
+  font-size: 20px !important;
+}
+
+[style*="font-size: 24px"] {
+  font-size: 24px !important;
+}
+
+[style*="font-size: 28px"] {
+  font-size: 28px !important;
+}
+
+[style*="font-size: 32px"] {
+  font-size: 32px !important;
+}
 
 [style*="color:"] {
   color: var(--lexical-color, inherit);
@@ -235,7 +281,7 @@
   padding: 15px;
   border: 1px solid #ccc;
   border-radius: 4px;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
   z-index: 1000;
   display: flex;
   gap: 10px;
@@ -281,7 +327,7 @@ a {
   background: white;
   padding: 20px;
   border-radius: 8px;
-  box-shadow: 0 0 10px rgba(0,0,0,0.2);
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
   z-index: 1000;
 }
 
@@ -465,7 +511,7 @@ canvas {
   padding: 4px;
   display: flex;
   gap: 4px;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
   z-index: 1000;
 }
 
@@ -545,11 +591,9 @@ canvas {
   height: 16px;
 }
 
-
 .format-icon {
   display: none;
 }
-
 
 .search-overlay {
   position: fixed;
@@ -559,7 +603,7 @@ canvas {
   border: 1px solid #ccc;
   border-radius: 4px;
   padding: 8px;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
   display: flex;
   align-items: center;
   gap: 8px;
@@ -577,4 +621,51 @@ canvas {
   color: #666;
   font-size: 12px;
   margin: 0 8px;
+}
+
+/* Delete confirmation modal */
+.delete-confirm-modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.delete-confirm-content {
+  background: white;
+  padding: 24px;
+  border-radius: 8px;
+  width: 400px;
+  max-width: 90%;
+}
+
+.delete-confirm-content p {
+  margin: 0 0 20px;
+  font-size: 16px;
+  text-align: center;
+}
+
+.delete-confirm-actions {
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+}
+
+.delete-confirm-actions button:first-child {
+  background: #dc2626;
+  color: white;
+}
+
+.delete-confirm-actions button {
+  padding: 8px 16px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-weight: 500;
 }

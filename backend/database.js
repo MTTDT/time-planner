@@ -290,3 +290,27 @@ export async function deleteUser(login_name) {
     }
 }
 
+
+
+export async function getTheme(id) {
+    try {
+        const [rows] = await pool.query('SELECT * FROM theme WHERE id_theme = ?', [id]);
+        return rows[0];
+    } catch (error) {
+        console.error('Error fetching theme:', error);
+        throw error;
+    }
+}
+
+export async function updateTheme(id, name) {
+    try {
+        const [result] = await pool.query(
+            'UPDATE theme SET name = ? WHERE id_theme = ?',
+            [name, id]
+        );
+        return result.affectedRows;
+    } catch (error) {
+        console.error('Error updating theme:', error);
+        throw error;
+    }
+}

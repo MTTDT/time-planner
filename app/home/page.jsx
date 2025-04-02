@@ -7,8 +7,10 @@ import UI from "../components/UI";
 import Sidebar from "../components/plugins/Sidebar";
 import { useTheme } from "../context/ThemeContext";
 import { useRouter } from 'next/navigation';
+import { api_get_theme } from "../api_req";
 
 const Home = () => {
+  
     const { themeColor, secondaryColor } = useTheme();
     const [theme, setTheme] = useState("light");
     const [currentView, setCurrentView] = useState("home");
@@ -47,6 +49,15 @@ const Home = () => {
         }
         document.documentElement.style.setProperty("--secondary-color", secondaryColor);
     }, [theme, themeColor, secondaryColor]);
+
+    useEffect(()=>{
+      async function getTheme() {
+        const th = await api_get_theme(1)
+        console.log(th.name)
+        setTheme(th.name)
+      }
+      getTheme()
+    },[])
 
     return (
         <div

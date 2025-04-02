@@ -171,8 +171,47 @@ async function api_update_todo_item(id, { title, is_checked, start_date, start_t
       throw error;
   }
 }
+
+async function api_get_theme(id) {
+  try {
+      const response = await fetch(`http://localhost:8080/theme/${id}`);
+      
+      if (!response.ok) {
+          throw new Error(`Failed to fetch theme (HTTP ${response.status})`);
+      }
+
+      return await response.json();
+  } catch (error) {
+      console.error(`Error fetching theme ${id}:`, error);
+      throw error;
+  }
+}
+
+async function api_update_theme(id, { name }) {
+  try {
+      const response = await fetch(`http://localhost:8080/theme/${id}`, {
+          method: 'PUT',
+          headers: {
+              'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ name })
+      });
+
+      if (!response.ok) {
+          throw new Error(`Failed to update theme (HTTP ${response.status})`);
+      }
+
+      return await response.json();
+  } catch (error) {
+      console.error(`Error updating theme ${id}:`, error);
+      throw error;
+  }
+}
+
 export 
 {
+  api_get_theme,
+  api_update_theme,
   api_add_calendar_event, 
   api_get_calendar_event_by_id, 
   api_get_all_calendar_events, 

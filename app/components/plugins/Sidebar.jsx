@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { FaArrowLeft, FaArrowRight, FaCalendar, FaClock, FaCog } from 'react-icons/fa';
+import { FaArrowLeft, FaArrowRight, FaCalendar, FaClock, FaCog, FaBook, FaGraduationCap } from 'react-icons/fa';
 import Link from 'next/link';
 
 const Sidebar = ({ onToggle }) => {
@@ -33,11 +33,23 @@ const Sidebar = ({ onToggle }) => {
             </button>
           </Link>
 
-          {/* Schedule Button */}
-          <button className="flex w-full items-center p-4 hover:bg-gray-700 text-white">
-            <FaClock className="text-xl text-white" />
-            {isOpen && <span className="ml-4 text-white">Schedule</span>}
-          </button>
+          {/* Notebook Link */}
+          <Link href="/notebook" className="w-full no-underline">
+            <button className="flex w-full items-center p-4 hover:bg-gray-700 text-white">
+              <FaBook className="text-xl text-white" />
+              {isOpen && <span className="ml-4 text-white">Notebook</span>}
+            </button>
+          </Link>
+
+
+
+          {/* Graduation Link */}
+          <Link href="/schedule" className="w-full no-underline">
+            <button className="flex w-full items-center p-4 hover:bg-gray-700 text-white">
+              <FaGraduationCap className="text-xl text-white" />
+              {isOpen && <span className="ml-4 text-white">Schedule</span>}
+            </button>
+          </Link>
 
           {/* Settings Link */}
           <Link href="/settings" className="w-full no-underline">
@@ -50,6 +62,6 @@ const Sidebar = ({ onToggle }) => {
       </div>
     </div>
   );
-s};
+};
 
 export default Sidebar;

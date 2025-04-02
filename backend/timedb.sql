@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Mar 19, 2025 at 11:56 PM
+-- Generation Time: Apr 02, 2025 at 12:13 AM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.2.12
 
@@ -28,21 +28,16 @@ SET time_zone = "+00:00";
 --
 
 CREATE TABLE `app_user` (
-  `login_name` varchar(255) CHARACTER SET utf16 COLLATE utf16_unicode_ci NOT NULL,
-  `password` varchar(255) CHARACTER SET utf16 COLLATE utf16_unicode_ci NOT NULL,
+  `id` int(11) NOT NULL,
+  `login_name` varchar(255) NOT NULL,
+  `password` varchar(255) NOT NULL,
   `login_date` date NOT NULL DEFAULT current_timestamp(),
+  `login_time` time DEFAULT NULL,
   `login_streak` int(11) DEFAULT NULL,
   `total_points` int(11) DEFAULT NULL,
-  `fk_dashboard` int(11) NOT NULL,
-  `fk_preferences` int(11) NOT NULL
+  `fk_dashboard` int(11) DEFAULT NULL,
+  `fk_preferences` int(11) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
-
---
--- Dumping data for table `app_user`
---
-
-INSERT INTO `app_user` (`login_name`, `password`, `login_date`, `login_streak`, `total_points`, `fk_dashboard`, `fk_preferences`) VALUES
-('useris', 'pw', '2025-03-19', 1, 1, 1, 1);
 
 -- --------------------------------------------------------
 
@@ -54,16 +49,6 @@ CREATE TABLE `calendar` (
   `fk_dashboard` int(11) NOT NULL,
   `fk_calendar_Event` int(11) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
-
---
--- Dumping data for table `calendar`
---
-
-INSERT INTO `calendar` (`fk_dashboard`, `fk_calendar_Event`) VALUES
-(1, 10),
-(1, 12),
-(1, 14),
-(1, 15);
 
 -- --------------------------------------------------------
 
@@ -80,17 +65,6 @@ CREATE TABLE `calendar_event` (
   `end_time` time DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
---
--- Dumping data for table `calendar_event`
---
-
-INSERT INTO `calendar_event` (`id`, `title`, `description`, `event_date`, `start_time`, `end_time`) VALUES
-(10, 'pirmas', 'abb', '2025-03-20', '00:00:00', '01:00:00'),
-(12, 'aaa', '', '2025-03-20', '20:00:00', '21:30:00'),
-(14, 'aaaa', '', '2025-03-19', '22:00:00', '23:00:00'),
-(15, 'vvvv', '', '2025-03-19', '22:00:00', '23:00:00'),
-(16, 'new', 'ccc', '2025-03-22', '09:13:27', '20:13:27');
-
 -- --------------------------------------------------------
 
 --
@@ -99,18 +73,12 @@ INSERT INTO `calendar_event` (`id`, `title`, `description`, `event_date`, `start
 
 CREATE TABLE `comments` (
   `id` int(11) NOT NULL,
-  `description` varchar(255) CHARACTER SET utf16 COLLATE utf16_unicode_ci DEFAULT NULL,
-  `created_date` date NOT NULL DEFAULT current_timestamp(),
-  `fk_app_user` varchar(255) CHARACTER SET utf16 COLLATE utf16_unicode_ci NOT NULL,
+  `description` varchar(255) DEFAULT NULL,
+  `created_date` date DEFAULT NULL,
+  `created_time` time DEFAULT NULL,
+  `fk_app_user` int(11) NOT NULL,
   `fk_calendar_Event` int(11) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
-
---
--- Dumping data for table `comments`
---
-
-INSERT INTO `comments` (`id`, `description`, `created_date`, `fk_app_user`, `fk_calendar_Event`) VALUES
-(1, 'komentaras', '2025-03-19', 'useris', 10);
 
 -- --------------------------------------------------------
 
@@ -120,16 +88,9 @@ INSERT INTO `comments` (`id`, `description`, `created_date`, `fk_app_user`, `fk_
 
 CREATE TABLE `dashboard` (
   `id` int(11) NOT NULL,
-  `title` varchar(255) CHARACTER SET utf16 COLLATE utf16_unicode_ci DEFAULT NULL,
+  `title` varchar(255) DEFAULT NULL,
   `fk_preferences` int(11) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
-
---
--- Dumping data for table `dashboard`
---
-
-INSERT INTO `dashboard` (`id`, `title`, `fk_preferences`) VALUES
-(1, 'main', 1);
 
 -- --------------------------------------------------------
 
@@ -139,15 +100,8 @@ INSERT INTO `dashboard` (`id`, `title`, `fk_preferences`) VALUES
 
 CREATE TABLE `event_members` (
   `fk_calendar_Event` int(11) NOT NULL,
-  `fk_app_user` varchar(255) CHARACTER SET utf16 COLLATE utf16_unicode_ci NOT NULL
+  `fk_app_user` int(11) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
-
---
--- Dumping data for table `event_members`
---
-
-INSERT INTO `event_members` (`fk_calendar_Event`, `fk_app_user`) VALUES
-(10, 'useris');
 
 -- --------------------------------------------------------
 
@@ -157,17 +111,10 @@ INSERT INTO `event_members` (`fk_calendar_Event`, `fk_app_user`) VALUES
 
 CREATE TABLE `note` (
   `id` int(11) NOT NULL,
-  `title` varchar(255) CHARACTER SET utf16 COLLATE utf16_unicode_ci DEFAULT NULL,
-  `content` varchar(255) CHARACTER SET utf16 COLLATE utf16_unicode_ci DEFAULT NULL,
-  `created_date` date NOT NULL DEFAULT current_timestamp()
+  `title` varchar(255) DEFAULT NULL,
+  `desription` varchar(255) DEFAULT NULL,
+  `created_date` date DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
-
---
--- Dumping data for table `note`
---
-
-INSERT INTO `note` (`id`, `title`, `content`, `created_date`) VALUES
-(1, 'uzrasas', 'aaaaaa sssssssss', '2025-03-19');
 
 -- --------------------------------------------------------
 
@@ -180,13 +127,6 @@ CREATE TABLE `notebook` (
   `fk_note` int(11) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
---
--- Dumping data for table `notebook`
---
-
-INSERT INTO `notebook` (`fk_dashboard`, `fk_note`) VALUES
-(1, 1);
-
 -- --------------------------------------------------------
 
 --
@@ -195,18 +135,11 @@ INSERT INTO `notebook` (`fk_dashboard`, `fk_note`) VALUES
 
 CREATE TABLE `note_activity` (
   `id` int(11) NOT NULL,
-  `activity` varchar(255) CHARACTER SET utf16 COLLATE utf16_unicode_ci DEFAULT NULL,
+  `activity` varchar(255) DEFAULT NULL,
   `created_date` date DEFAULT NULL,
   `fk_note` int(11) NOT NULL,
-  `fk_app_user` varchar(255) CHARACTER SET utf16 COLLATE utf16_unicode_ci NOT NULL
+  `fk_app_user` int(11) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
-
---
--- Dumping data for table `note_activity`
---
-
-INSERT INTO `note_activity` (`id`, `activity`, `created_date`, `fk_note`, `fk_app_user`) VALUES
-(1, 'sukurtas uzrasas', '2025-03-19', 1, 'useris');
 
 -- --------------------------------------------------------
 
@@ -216,8 +149,8 @@ INSERT INTO `note_activity` (`id`, `activity`, `created_date`, `fk_note`, `fk_ap
 
 CREATE TABLE `note_attachment` (
   `id` int(11) NOT NULL,
-  `file_name` varchar(255) CHARACTER SET utf16 COLLATE utf16_unicode_ci DEFAULT NULL,
-  `file_type` varchar(255) CHARACTER SET utf16 COLLATE utf16_unicode_ci DEFAULT NULL,
+  `file_name` varchar(255) DEFAULT NULL,
+  `file_type` varchar(255) DEFAULT NULL,
   `fk_note` int(11) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
@@ -229,15 +162,8 @@ CREATE TABLE `note_attachment` (
 
 CREATE TABLE `note_members` (
   `fk_note` int(11) NOT NULL,
-  `fk_app_user` varchar(255) CHARACTER SET utf16 COLLATE utf16_unicode_ci NOT NULL
+  `fk_app_user` int(11) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
-
---
--- Dumping data for table `note_members`
---
-
-INSERT INTO `note_members` (`fk_note`, `fk_app_user`) VALUES
-(1, 'useris');
 
 -- --------------------------------------------------------
 
@@ -247,19 +173,12 @@ INSERT INTO `note_members` (`fk_note`, `fk_app_user`) VALUES
 
 CREATE TABLE `notifications` (
   `id` int(11) NOT NULL,
-  `title` varchar(255) CHARACTER SET utf16 COLLATE utf16_unicode_ci DEFAULT NULL,
-  `description` varchar(255) CHARACTER SET utf16 COLLATE utf16_unicode_ci DEFAULT NULL,
+  `title` varchar(255) DEFAULT NULL,
+  `description` varchar(255) DEFAULT NULL,
   `sent_date` date DEFAULT NULL,
   `sent_time` time DEFAULT NULL,
   `remind_later` tinyint(1) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
-
---
--- Dumping data for table `notifications`
---
-
-INSERT INTO `notifications` (`id`, `title`, `description`, `sent_date`, `sent_time`, `remind_later`) VALUES
-(1, 'hello world', 'goodbye world', '2025-03-18', '19:57:02', NULL);
 
 -- --------------------------------------------------------
 
@@ -272,13 +191,6 @@ CREATE TABLE `notification_center` (
   `fk_notifications` int(11) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
---
--- Dumping data for table `notification_center`
---
-
-INSERT INTO `notification_center` (`fk_dashboard`, `fk_notifications`) VALUES
-(1, 1);
-
 -- --------------------------------------------------------
 
 --
@@ -289,15 +201,8 @@ CREATE TABLE `points` (
   `id` int(11) NOT NULL,
   `received_date` date DEFAULT NULL,
   `received_time` time DEFAULT NULL,
-  `fk_app_user` varchar(255) CHARACTER SET utf16 COLLATE utf16_unicode_ci NOT NULL
+  `fk_app_user` int(11) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
-
---
--- Dumping data for table `points`
---
-
-INSERT INTO `points` (`id`, `received_date`, `received_time`, `fk_app_user`) VALUES
-(1, '2025-03-19', '20:57:47', 'useris');
 
 -- --------------------------------------------------------
 
@@ -307,17 +212,10 @@ INSERT INTO `points` (`id`, `received_date`, `received_time`, `fk_app_user`) VAL
 
 CREATE TABLE `preferences` (
   `id` int(11) NOT NULL,
-  `primary_color` varchar(255) CHARACTER SET utf16 COLLATE utf16_unicode_ci DEFAULT NULL,
-  `secondary_color` varchar(255) CHARACTER SET utf16 COLLATE utf16_unicode_ci DEFAULT NULL,
-  `theme_mode` int(11) NOT NULL
+  `primary_color` varchar(255) DEFAULT NULL,
+  `secondary_color` varchar(255) DEFAULT NULL,
+  `theme_mode` int(11) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
-
---
--- Dumping data for table `preferences`
---
-
-INSERT INTO `preferences` (`id`, `primary_color`, `secondary_color`, `theme_mode`) VALUES
-(1, NULL, NULL, 1);
 
 -- --------------------------------------------------------
 
@@ -327,7 +225,7 @@ INSERT INTO `preferences` (`id`, `primary_color`, `secondary_color`, `theme_mode
 
 CREATE TABLE `theme` (
   `id_theme` int(11) NOT NULL,
-  `name` char(6) CHARACTER SET utf16 COLLATE utf16_unicode_ci NOT NULL
+  `name` char(6) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
 --
@@ -348,23 +246,15 @@ INSERT INTO `theme` (`id_theme`, `name`) VALUES
 
 CREATE TABLE `todo_item` (
   `id` int(11) NOT NULL,
-  `title` varchar(255) CHARACTER SET utf16 COLLATE utf16_unicode_ci DEFAULT NULL,
+  `title` varchar(255) DEFAULT NULL,
   `is_checked` tinyint(1) DEFAULT NULL,
   `start_date` date DEFAULT NULL,
   `start_time` time DEFAULT NULL,
   `end_date` date DEFAULT NULL,
   `end_time` time DEFAULT NULL,
   `fk_dashboard` int(11) NOT NULL,
-  `fk_app_user` varchar(255) CHARACTER SET utf16 COLLATE utf16_unicode_ci NOT NULL
+  `fk_app_user` int(11) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
-
---
--- Dumping data for table `todo_item`
---
-
-INSERT INTO `todo_item` (`id`, `title`, `is_checked`, `start_date`, `start_time`, `end_date`, `end_time`, `fk_dashboard`, `fk_app_user`) VALUES
-(1, 'aa', 0, '2025-03-19', '22:48:28', '2025-03-19', '23:48:28', 1, 'useris'),
-(2, 'todo', 0, '2025-03-19', '23:58:11', '2025-03-20', '18:58:11', 1, 'useris');
 
 --
 -- Indexes for dumped tables
@@ -374,7 +264,7 @@ INSERT INTO `todo_item` (`id`, `title`, `is_checked`, `start_date`, `start_time`
 -- Indexes for table `app_user`
 --
 ALTER TABLE `app_user`
-  ADD PRIMARY KEY (`login_name`),
+  ADD PRIMARY KEY (`id`),
   ADD KEY `has` (`fk_dashboard`),
   ADD KEY `configures` (`fk_preferences`);
 
@@ -494,46 +384,34 @@ ALTER TABLE `todo_item`
 --
 
 --
--- AUTO_INCREMENT for table `calendar`
+-- AUTO_INCREMENT for table `app_user`
 --
-ALTER TABLE `calendar`
-  MODIFY `fk_dashboard` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+ALTER TABLE `app_user`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
 
 --
 -- AUTO_INCREMENT for table `calendar_event`
 --
 ALTER TABLE `calendar_event`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=17;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
 
 --
 -- AUTO_INCREMENT for table `comments`
 --
 ALTER TABLE `comments`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
-
---
--- AUTO_INCREMENT for table `event_members`
---
-ALTER TABLE `event_members`
-  MODIFY `fk_calendar_Event` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=11;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
 
 --
 -- AUTO_INCREMENT for table `note`
 --
 ALTER TABLE `note`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
-
---
--- AUTO_INCREMENT for table `notebook`
---
-ALTER TABLE `notebook`
-  MODIFY `fk_dashboard` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
 
 --
 -- AUTO_INCREMENT for table `note_activity`
 --
 ALTER TABLE `note_activity`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
 
 --
 -- AUTO_INCREMENT for table `note_attachment`
@@ -542,40 +420,28 @@ ALTER TABLE `note_attachment`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
 
 --
--- AUTO_INCREMENT for table `note_members`
---
-ALTER TABLE `note_members`
-  MODIFY `fk_note` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
-
---
 -- AUTO_INCREMENT for table `notifications`
 --
 ALTER TABLE `notifications`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
-
---
--- AUTO_INCREMENT for table `notification_center`
---
-ALTER TABLE `notification_center`
-  MODIFY `fk_dashboard` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
 
 --
 -- AUTO_INCREMENT for table `points`
 --
 ALTER TABLE `points`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
 
 --
 -- AUTO_INCREMENT for table `preferences`
 --
 ALTER TABLE `preferences`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
 
 --
 -- AUTO_INCREMENT for table `todo_item`
 --
 ALTER TABLE `todo_item`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
 
 --
 -- Constraints for dumped tables
@@ -600,7 +466,7 @@ ALTER TABLE `calendar`
 --
 ALTER TABLE `comments`
   ADD CONSTRAINT `assigned` FOREIGN KEY (`fk_calendar_Event`) REFERENCES `calendar_event` (`id`),
-  ADD CONSTRAINT `writes` FOREIGN KEY (`fk_app_user`) REFERENCES `app_user` (`login_name`);
+  ADD CONSTRAINT `writes` FOREIGN KEY (`fk_app_user`) REFERENCES `app_user` (`id`);
 
 --
 -- Constraints for table `dashboard`
@@ -613,7 +479,7 @@ ALTER TABLE `dashboard`
 --
 ALTER TABLE `event_members`
   ADD CONSTRAINT `edit_event` FOREIGN KEY (`fk_calendar_Event`) REFERENCES `calendar_event` (`id`),
-  ADD CONSTRAINT `is_event_member` FOREIGN KEY (`fk_app_user`) REFERENCES `app_user` (`login_name`);
+  ADD CONSTRAINT `is_event_member` FOREIGN KEY (`fk_app_user`) REFERENCES `app_user` (`id`);
 
 --
 -- Constraints for table `notebook`
@@ -627,7 +493,7 @@ ALTER TABLE `notebook`
 --
 ALTER TABLE `note_activity`
   ADD CONSTRAINT `belongs_to` FOREIGN KEY (`fk_note`) REFERENCES `note` (`id`),
-  ADD CONSTRAINT `makes` FOREIGN KEY (`fk_app_user`) REFERENCES `app_user` (`login_name`);
+  ADD CONSTRAINT `makes` FOREIGN KEY (`fk_app_user`) REFERENCES `app_user` (`id`);
 
 --
 -- Constraints for table `note_attachment`
@@ -640,7 +506,7 @@ ALTER TABLE `note_attachment`
 --
 ALTER TABLE `note_members`
   ADD CONSTRAINT `edit_note` FOREIGN KEY (`fk_note`) REFERENCES `note` (`id`),
-  ADD CONSTRAINT `is_note_member` FOREIGN KEY (`fk_app_user`) REFERENCES `app_user` (`login_name`);
+  ADD CONSTRAINT `is_note_member` FOREIGN KEY (`fk_app_user`) REFERENCES `app_user` (`id`);
 
 --
 -- Constraints for table `notification_center`
@@ -653,7 +519,7 @@ ALTER TABLE `notification_center`
 -- Constraints for table `points`
 --
 ALTER TABLE `points`
-  ADD CONSTRAINT `given_to` FOREIGN KEY (`fk_app_user`) REFERENCES `app_user` (`login_name`);
+  ADD CONSTRAINT `given_to` FOREIGN KEY (`fk_app_user`) REFERENCES `app_user` (`id`);
 
 --
 -- Constraints for table `preferences`
@@ -665,7 +531,7 @@ ALTER TABLE `preferences`
 -- Constraints for table `todo_item`
 --
 ALTER TABLE `todo_item`
-  ADD CONSTRAINT `creates_todo` FOREIGN KEY (`fk_app_user`) REFERENCES `app_user` (`login_name`),
+  ADD CONSTRAINT `creates_todo` FOREIGN KEY (`fk_app_user`) REFERENCES `app_user` (`id`),
   ADD CONSTRAINT `inside_todo` FOREIGN KEY (`fk_dashboard`) REFERENCES `dashboard` (`id`);
 COMMIT;
 

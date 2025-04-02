@@ -1,14 +1,31 @@
-
-import mysql from 'mysql2';
+import mysql from 'mysql2/promise';
 import dotenv from 'dotenv';
 dotenv.config();
 
+let connection;
+
 const pool = mysql.createPool({
-    host: 'localhost',
-    user: 'root',       // default XAMPP username
-    password: '',       // default XAMPP password (empty)
-    database: 'timedb' // your database name
-}).promise();
+    host: process.env.DB_HOST,
+    user: process.env.DB_USER,       
+    password: process.env.DB_PASSWORD,       
+    database: process.env.DB_DATABASE
+});
+
+export const connectToDatabase = async () => {
+    try {
+      if (!connection) {
+        connection = await mysql.createConnection({
+          host: process.env.DB_HOST,
+          user: process.env.DB_USER,
+          password: process.env.DB_PASSWORD,
+          database: process.env.DB_DATABASE
+        });
+      }
+      return connection;
+    } catch (err) {
+      console.log(err);
+    }
+  };
 
 //----------------------------------------------
 // calendar_event

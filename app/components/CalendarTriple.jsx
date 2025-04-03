@@ -448,4 +448,247 @@ function CalendarTriple() {
     );
 }
 
-export default CalendarTriple;
+jest.mock('../app/api_req', () => ({
+    api_get_all_calendar_events: jest.fn(),
+    api_add_calendar_event: jest.fn(),
+    api_update_calendar_event: jest.fn(),
+    api_delete_calendar_event: jest.fn(),
+}));
+
+describe('Integration Tests for CalendarTriple', () => {
+    beforeEach(() => {
+        jest.clearAllMocks();
+    });
+
+    test('renders the calendar and event form', () => {
+        render(<CalendarTriple />);
+        expect(screen.getByText('Calendar')).toBeInTheDocument();
+        expect(screen.getByPlaceholderText('Meeting with team')).toBeInTheDocument();
+        expect(screen.getByText('Add Event')).toBeInTheDocument();
+    });
+
+    test('fetches and displays events from the API', async () => {
+        const mockEvents = [
+            {
+                id: 1,
+                title: 'Team Meeting',
+                event_date: '2025-04-03',
+                start_time: '10:00:00',
+                end_time: '11:00:00',
+                description: 'Discuss project updates',
+            },
+        ];
+        api.api_get_all_calendar_events.mockResolvedValue(mockEvents);
+
+        await act(async () => {
+            render(<CalendarTriple />);
+        });
+
+        expect(api.api_get_all_calendar_events).toHaveBeenCalledTimes(1);
+        expect(screen.getByText('Team Meeting')).toBeInTheDocument();
+    });
+
+    test('adds a new event', async () => {
+        render(<CalendarTriple />);
+
+        fireEvent.change(screen.getByPlaceholderText('Meeting with team'), {
+            target: { value: 'New Event' },
+        });
+
+        fireEvent.click(screen.getByText('Add Event'));
+
+        expect(api.api_add_calendar_event).toHaveBeenCalledTimes(1);
+        expect(api.api_add_calendar_event).toHaveBeenCalledWith(
+            expect.objectContaining({
+                title: 'New Event',
+            })
+        );
+    });
+
+    test('does not add an event with missing fields', () => {
+        render(<CalendarTriple />);
+
+        fireEvent.click(screen.getByText('Add Event'));
+
+        expect(api.api_add_calendar_event).not.toHaveBeenCalled();
+        expect(screen.getByText('Please fill in all fields')).toBeInTheDocument();
+    });
+
+    test('opens the edit modal on double-clicking an event', async () => {
+        const mockEvents = [
+            {
+                id: 1,
+                title: 'Team Meeting',
+                event_date: '2025-04-03',
+                start_time: '10:00:00',
+                end_time: '11:00:00',
+                description: 'Discuss project updates',
+            },
+        ];
+        api.api_get_all_calendar_events.mockResolvedValue(mockEvents);
+
+        await act(async () => {
+            render(<CalendarTriple />);
+        });
+
+        const event = screen.getByText('Team Meeting');
+        fireEvent.doubleClick(event);
+
+        expect(screen.getByText('Edit Event')).toBeInTheDocument();
+        expect(screen.getByDisplayValue('Team Meeting')).toBeInTheDocument();
+    });
+
+    test('edits an event and saves changes', async () => {
+        const mockEvents = [
+            {
+                id: 1,
+                title: 'Team Meeting',
+                event_date: '2025-04-03',
+                start_time: '10:00:00',
+                end_time: '11:00:00',
+                description: 'Discuss project updates',
+            },
+        ];
+        api.api_get_all_calendar_events.mockResolvedValue(mockEvents);
+
+        await act(async () => {
+            render(<CalendarTriple />);
+        });
+
+        const event = screen.getByText('Team Meeting');
+        fireEvent.doubleClick(event);
+
+        const titleInput = screen.getByPlaceholderText('Event Title');
+        fireEvent.change(titleInput, { target: { value: 'Updated Meeting' } });
+
+        fireEvent.click(screen.getByText('Save Changes'));
+
+        expect(api.api_update_calendar_event).toHaveBeenCalledTimes(1);
+        expect(api.api_update_calendar_event).toHaveBeenCalledWith(
+            1,
+            expect.objectContaining({
+                title: 'Updated Meeting',
+            })
+        );
+    });
+
+    test('deletes an event', async () => {
+        const mockEvents = [
+            {
+                id: 1,
+                title: 'Team Meeting',
+                event_date: '2025-04-03',
+                start_time: '10:00:00',
+                end_time: '11:00:00',
+                description: 'Discuss project updates',
+            },
+        ];
+        api.api_get_all_calendar_events.mockResolvedValue(mockEvents);
+
+        await act(async () => {
+            render(<CalendarTriple />);
+        });
+
+        const event = screen.getByText('Team Meeting');
+        fireEvent.doubleClick(event);
+
+        fireEvent.click(screen.getByText('Delete'));
+
+        expect(api.api_delete_calendar_event).toHaveBeenCalledTimes(1);
+        expect(api.api_delete_calendar_event).toHaveBeenCalledWith(1);
+    });
+
+    test('opens the notes editor', async () => {
+        const mockEvents = [
+            {
+                id: 1,
+                title: 'Team Meeting',
+                event_date: '2025-04-03',
+                start_time: '10:00:00',
+                end_time: '11:00:00',
+                description: 'Discuss project updates',
+            },
+        ];
+        api.api_get_all_calendar_events.mockResolvedValue(mockEvents);
+
+        await act(async () => {
+            render(<CalendarTriple />);
+        });
+
+        const event = screen.getByText('Team Meeting');
+        fireEvent.doubleClick(event);
+
+        fireEvent.click(screen.getByText('Add Notes'));
+
+        expect(screen.getByText('Notes Editor')).toBeInTheDocument();
+    });
+
+    test('saves notes for an event', async () => {
+        const mockEvents = [
+            {
+                id: 1,
+                title: 'Team Meeting',
+                event_date: '2025-04-03',
+                start_time: '10:00:00',
+                end_time: '11:00:00',
+                description: 'Discuss project updates',
+            },
+        ];
+        api.api_get_all_calendar_events.mockResolvedValue(mockEvents);
+
+        await act(async () => {
+            render(<CalendarTriple />);
+        });
+
+        const event = screen.getByText('Team Meeting');
+        fireEvent.doubleClick(event);
+
+        fireEvent.click(screen.getByText('Add Notes'));
+
+        const notesEditor = screen.getByText('Notes Editor');
+        fireEvent.change(notesEditor, { target: { value: 'New Notes' } });
+
+        fireEvent.click(screen.getByText('Save'));
+
+        expect(api.api_update_calendar_event).toHaveBeenCalledTimes(1);
+        expect(api.api_update_calendar_event).toHaveBeenCalledWith(
+            1,
+            expect.objectContaining({
+                description: 'New Notes',
+            })
+        );
+    });
+
+    test('deletes notes for an event', async () => {
+        const mockEvents = [
+            {
+                id: 1,
+                title: 'Team Meeting',
+                event_date: '2025-04-03',
+                start_time: '10:00:00',
+                end_time: '11:00:00',
+                description: 'Discuss project updates',
+            },
+        ];
+        api.api_get_all_calendar_events.mockResolvedValue(mockEvents);
+
+        await act(async () => {
+            render(<CalendarTriple />);
+        });
+
+        const event = screen.getByText('Team Meeting');
+        fireEvent.doubleClick(event);
+
+        fireEvent.click(screen.getByText('Add Notes'));
+
+        fireEvent.click(screen.getByText('Delete Notes'));
+
+        expect(api.api_update_calendar_event).toHaveBeenCalledTimes(1);
+        expect(api.api_update_calendar_event).toHaveBeenCalledWith(
+            1,
+            expect.objectContaining({
+                description: '',
+            })
+        );
+    });
+});

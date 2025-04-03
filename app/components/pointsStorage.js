@@ -33,11 +33,26 @@ export function clearPoints() {
 }
 
 export function getPoints() {
-    return points;
+    if (typeof window !== "undefined") {
+        return parseInt(localStorage.getItem("points") || "0", 10);
+    }
+    return 0;
 }
 
 export function getAllPoints() {
-    return allPoints;
+    if (typeof window !== "undefined") {
+        return JSON.parse(localStorage.getItem("allPoints") || "[]");
+    }
+    return [];
+}
+
+export function reset() {
+    points = 0;
+    allPoints = [];
+    if (typeof window !== "undefined") {
+        localStorage.setItem("points", "0");
+        localStorage.setItem("allPoints", JSON.stringify([]));
+    }
 }
 
 // Listener system to notify React components

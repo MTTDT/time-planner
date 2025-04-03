@@ -1,6 +1,6 @@
 "use client";
 import { format, getDay, parse, startOfWeek, setHours, setMinutes } from "date-fns";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import { Calendar, dateFnsLocalizer } from "react-big-calendar";
 import "react-big-calendar/lib/css/react-big-calendar.css";
 import DatePicker from "react-datepicker";
@@ -22,6 +22,14 @@ const localizer = dateFnsLocalizer({
     getDay,
     locales,
 });
+const formats = {
+    timeGutterFormat: 'HH:mm', // Time on the left side (e.g., "08:00", "13:00")
+    eventTimeRangeFormat: ({ start, end }) => 
+      `${format(start, 'HH:mm')} - ${format(end, 'HH:mm')}`, // Event time display
+    agendaTimeFormat: 'HH:mm', // Agenda view time format
+    agendaTimeRangeFormat: ({ start, end }) => 
+      `${format(start, 'HH:mm')} - ${format(end, 'HH:mm')}`,
+  };
 
 function CalendarTriple() {
     const [newEvent, setNewEvent] = useState({ 
@@ -98,7 +106,78 @@ function CalendarTriple() {
         });
     };
 
-    const handleStartTimeChange = (time) => {
+
+    const TimeInput = ({ selected, onChange }) => {
+        const [hours, setHours] = useState(selected ? selected.getHours() : 0)
+        const [minutes, setMinutes] = useState(selected ? selected.getMinutes() : 0)
+        const hourInputRef = useRef(null)
+        const minuteInputRef = useRef(null)
+        const [activeInput, setActiveInput] = useState(null)
+      
+        // Track which input was active before re-render
+        useEffect(() => {
+          if (activeInput === "hour" && hourInputRef.current) {
+            hourInputRef.current.focus()
+          } else if (activeInput === "minute" && minuteInputRef.current) {
+            minuteInputRef.current.focus()
+          }
+        }, [hours, minutes, activeInput])
+      
+        const handleHourChange = (e) => {
+          const val = Math.min(23, Math.max(0, Number.parseInt(e.target.value) || 0))
+          setHours(val)
+            updateTime(val, minutes)
+        }
+      
+        const handleMinuteChange = (e) => {
+          const val = Math.min(59, Math.max(0, Number.parseInt(e.target.value) || 0))
+          setMinutes(val)
+          setActiveInput("minute")
+          updateTime(hours, val)
+        }
+      
+        const updateTime = (newHours, newMinutes) => {
+          // Use the selected date as base if available, otherwise use current date
+          const baseDate = selected || new Date()
+          const newTime = new Date(baseDate)
+          newTime.setHours(newHours)
+          newTime.setMinutes(newMinutes)
+          newTime.setSeconds(0)
+          newTime.setMilliseconds(0)
+      
+          onChange(newTime)
+        }
+      
+        return (
+          <div className="flex items-center space-x-2">
+            <input
+            
+              type="number"
+              min="0"
+              max="23"
+              value={hours.toString().padStart(2, "0")}
+              onChange={handleHourChange}
+              onFocus={() => setActiveInput("hour")}
+              placeholder="HH"
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition"
+              ref={hourInputRef}
+            />
+            <span>:</span>
+            <input
+              type="number"
+              min="0"
+              max="59"
+              value={minutes.toString().padStart(2, "0")}
+              onChange={handleMinuteChange}
+              onFocus={() => setActiveInput("minute")}
+              placeholder="MM"
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition"
+              ref={minuteInputRef}
+            />
+          </div>
+        )
+      }
+      const handleStartTimeChange = (time) => {
         if (!time) return;
         
         const newStart = new Date(selectedDate);
@@ -109,11 +188,11 @@ function CalendarTriple() {
         newEnd.setHours(newStart.getHours() + 1);
         
         setNewEvent({
-            ...newEvent,
-            start: newStart,
-            end: newEnd
+          ...newEvent,
+          start: newStart,
+          end: newEnd
         });
-    };
+      };
 
     const handleEndTimeChange = (time) => {
         if (!time) return;
@@ -250,20 +329,80 @@ function CalendarTriple() {
         return {};
     };
 
+    const CustomToolbar = (props) => {
+        const formattedLabel = props.label 
+    ? props.label.split(' ')[0].substring(0, 3) + ' ' + props.label.split(' ').slice(1).join(' ')
+    : props.label;
+
+        return (
+          <div className="flex justify-between items-center">
+            {/* Left Group: Today Button */}
+            <div className="flex">
+              <button 
+                type="button" 
+                onClick={() => props.onNavigate("TODAY")} 
+                className="border rounded-xl px-4 py-1 m-1 hover:bg-gray-500 text-xl hover:bg-opacity-30"
+              >
+                Today
+              </button>
+            </div>
+      
+            {/* Center Group: Back, Date Label, Next */}
+            <div className="flex items-center gap-2">
+              <button type="button" onClick={() => props.onNavigate("PREV")} className="border rounded-md px-2 hover:bg-gray-500 hover:bg-opacity-30">
+                {"<"}
+              </button>
+              <span className="rbc-toolbar-label mx-2 font-medium">
+                {formattedLabel}
+              </span>
+              <button type="button" onClick={() => props.onNavigate("NEXT")} className="border rounded-md px-2 hover:bg-gray-500 hover:bg-opacity-30">
+                {">"}
+              </button>
+            </div>
+      
+            {/* Right Group: Day, Week, Month Views */}
+            <div className="flex gap-4 border py-1 px-4 mr-2 rounded-xl ">
+              <button
+                type="button"
+                onClick={() => props.onView("day")}
+                className={`${props.view === "day" ? "bg-gray-500 bg-opacity-10" : ""} hover:bg-gray-500 hover:bg-opacity-30 rounded-xl px-3 py-1`}
+                
+              >
+                Day
+              </button>
+              <button
+                type="button"
+                onClick={() => props.onView("week")}
+                className={`${props.view === "week" ? "bg-gray-500 bg-opacity-10" : ""} hover:bg-gray-500 hover:bg-opacity-30 rounded-xl px-3 py-1`}
+              >
+                Week
+              </button>
+              <button
+                type="button"
+                onClick={() => props.onView("month")}
+                className={`${props.view === "month" ? "bg-gray-500 bg-opacity-10" : ""} hover:bg-gray-500 hover:bg-opacity-30 rounded-xl px-3 py-1`}
+              >
+                Month
+              </button>
+            </div>
+          </div>
+        );
+      };
+
     return (
-        <div className="min-h-screen bg-gray-50 p-4 md:p-8">
+        <div >
             <div className="max-w-7xl mx-auto">
                 <div className="flex flex-col md:flex-row gap-6">
                     {/* Left sidebar - Event form */}
-                    <div className="w-full md:w-80 bg-white rounded-xl shadow-md p-6 h-fit">
-                        <h1 className="text-2xl font-bold text-gray-800 mb-6">Calendar</h1>
+                    <div className="w-full md:w-80 rounded-xl shadow-md p-6 h-fit">
+                        <h1 className="text-2xl font-bold mb-6">Calendar</h1>
                         
                         <div className="space-y-4">
                             <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-1">Event Title</label>
+                                <label className="block text-sm font-medium  mb-1">Event Title</label>
                                 <input 
                                     type="text" 
-                                    placeholder="Meeting with team" 
+                                    placeholder="Add title" 
                                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition"
                                     value={newEvent.title} 
                                     onChange={(e) => setNewEvent({ ...newEvent, title: e.target.value })} 
@@ -271,36 +410,24 @@ function CalendarTriple() {
                             </div>
                             
                             <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-1">Start Time</label>
-                                <DatePicker
-                                    selected={newEvent.start}
-                                    onChange={handleStartTimeChange}
-                                    showTimeSelect
-                                    showTimeSelectOnly
-                                    timeFormat="HH:mm"
-                                    timeIntervals={15}
-                                    dateFormat="h:mm aa"
-                                    placeholderText="Select start time"
-                                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition"
+                                <label className="block text-sm font-medium mb-1">Start Time</label>
+                                <TimeInput 
+                                    selected={newEvent.start} 
+                                    onChange={handleStartTimeChange} 
                                 />
                             </div>
                             
-                            <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-1">End Time</label>
-                                <DatePicker
-                                    selected={newEvent.end}
-                                    onChange={handleEndTimeChange}
-                                    showTimeSelect
-                                    showTimeSelectOnly
-                                    timeFormat="HH:mm"
-                                    timeIntervals={15}
-                                    dateFormat="h:mm aa"
-                                    placeholderText="Select end time"
-                                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition"
-                                    minTime={newEvent.start}
-                                    maxTime={setHours(new Date(), 23)}
-                                />
-                            </div>
+                            
+                                {newEvent.start ? (
+                                    <div>
+                                        <label className="block text-sm font-medium  mb-1">End Time</label>
+                                    <TimeInput 
+                                        selected={newEvent.end} 
+                                        onChange={handleEndTimeChange} 
+                                    />
+                                </div>
+                                ):(<></>)}
+                                
                             
                             <button 
                                 className="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-lg transition duration-200"
@@ -313,27 +440,35 @@ function CalendarTriple() {
                     
                     {/* Main calendar area */}
                     <div className="flex-1">
-                        <div className="bg-white rounded-xl shadow-md overflow-hidden">
+                        <div className="overflow-hidden">
+                            
                             <Calendar 
                                 localizer={localizer} 
                                 events={allEvents} 
                                 startAccessor="start" 
                                 endAccessor="end" 
-                                style={{ height: 700 }}
+                                style={{ 
+                                    height: 700,
+                                    "--rbc-grid-color": "#ff5733", // Orange grid
+                                }}
                                 defaultView="week"
                                 views={['month', 'week', 'day']}
+                                components={{
+                                    toolbar: CustomToolbar, // Use your custom toolbar
+                                  }}
                                 selectable={true}
                                 onSelectSlot={handleSelectSlot}
                                 selected={selectedDate}
                                 dayPropGetter={dayPropGetter}
                                 onDoubleClickEvent={handleEventDoubleClick}
+                                formats={formats}
                                 eventPropGetter={(event) => ({
                                     style: {
-                                        backgroundColor: '#3b82f6',
+                                        background: '#70bcd4',
                                         borderRadius: '4px',
                                         border: 'none',
                                         color: 'white',
-                                        padding: '2px 8px'
+                                        padding: '2px 8px',
                                     }
                                 })}
                             />
@@ -362,34 +497,20 @@ function CalendarTriple() {
                                 
                                 <div>
                                     <label className="block text-sm font-medium text-gray-700 mb-1">Start Time</label>
-                                    <DatePicker
-                                        selected={editForm.start}
-                                        onChange={(date) => setEditForm({ ...editForm, start: date })}
-                                        showTimeSelect
-                                        showTimeSelectOnly
-                                        timeFormat="HH:mm"
-                                        timeIntervals={15}
-                                        dateFormat="h:mm aa"
-                                        placeholderText="Start Time"
-                                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition"
+                                    <TimeInput 
+                                        selected={editForm.start} 
+                                        onChange={(date) => setEditForm({ ...editForm, start: date })} 
                                     />
+                                   
                                 </div>
                                 
                                 <div>
                                     <label className="block text-sm font-medium text-gray-700 mb-1">End Time</label>
-                                    <DatePicker
-                                        selected={editForm.end}
-                                        onChange={(date) => setEditForm({ ...editForm, end: date })}
-                                        showTimeSelect
-                                        showTimeSelectOnly
-                                        timeFormat="HH:mm"
-                                        timeIntervals={15}
-                                        dateFormat="h:mm aa"
-                                        placeholderText="End Time"
-                                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition"
-                                        minTime={editForm.start}
-                                        maxTime={setHours(new Date(), 23)}
+                                    <TimeInput 
+                                        selected={editForm.end} 
+                                        onChange={(date) => setEditForm({ ...editForm, end: date })} 
                                     />
+                                     
                                 </div>
                                 
                                 <button
@@ -448,247 +569,4 @@ function CalendarTriple() {
     );
 }
 
-jest.mock('../app/api_req', () => ({
-    api_get_all_calendar_events: jest.fn(),
-    api_add_calendar_event: jest.fn(),
-    api_update_calendar_event: jest.fn(),
-    api_delete_calendar_event: jest.fn(),
-}));
-
-describe('Integration Tests for CalendarTriple', () => {
-    beforeEach(() => {
-        jest.clearAllMocks();
-    });
-
-    test('renders the calendar and event form', () => {
-        render(<CalendarTriple />);
-        expect(screen.getByText('Calendar')).toBeInTheDocument();
-        expect(screen.getByPlaceholderText('Meeting with team')).toBeInTheDocument();
-        expect(screen.getByText('Add Event')).toBeInTheDocument();
-    });
-
-    test('fetches and displays events from the API', async () => {
-        const mockEvents = [
-            {
-                id: 1,
-                title: 'Team Meeting',
-                event_date: '2025-04-03',
-                start_time: '10:00:00',
-                end_time: '11:00:00',
-                description: 'Discuss project updates',
-            },
-        ];
-        api.api_get_all_calendar_events.mockResolvedValue(mockEvents);
-
-        await act(async () => {
-            render(<CalendarTriple />);
-        });
-
-        expect(api.api_get_all_calendar_events).toHaveBeenCalledTimes(1);
-        expect(screen.getByText('Team Meeting')).toBeInTheDocument();
-    });
-
-    test('adds a new event', async () => {
-        render(<CalendarTriple />);
-
-        fireEvent.change(screen.getByPlaceholderText('Meeting with team'), {
-            target: { value: 'New Event' },
-        });
-
-        fireEvent.click(screen.getByText('Add Event'));
-
-        expect(api.api_add_calendar_event).toHaveBeenCalledTimes(1);
-        expect(api.api_add_calendar_event).toHaveBeenCalledWith(
-            expect.objectContaining({
-                title: 'New Event',
-            })
-        );
-    });
-
-    test('does not add an event with missing fields', () => {
-        render(<CalendarTriple />);
-
-        fireEvent.click(screen.getByText('Add Event'));
-
-        expect(api.api_add_calendar_event).not.toHaveBeenCalled();
-        expect(screen.getByText('Please fill in all fields')).toBeInTheDocument();
-    });
-
-    test('opens the edit modal on double-clicking an event', async () => {
-        const mockEvents = [
-            {
-                id: 1,
-                title: 'Team Meeting',
-                event_date: '2025-04-03',
-                start_time: '10:00:00',
-                end_time: '11:00:00',
-                description: 'Discuss project updates',
-            },
-        ];
-        api.api_get_all_calendar_events.mockResolvedValue(mockEvents);
-
-        await act(async () => {
-            render(<CalendarTriple />);
-        });
-
-        const event = screen.getByText('Team Meeting');
-        fireEvent.doubleClick(event);
-
-        expect(screen.getByText('Edit Event')).toBeInTheDocument();
-        expect(screen.getByDisplayValue('Team Meeting')).toBeInTheDocument();
-    });
-
-    test('edits an event and saves changes', async () => {
-        const mockEvents = [
-            {
-                id: 1,
-                title: 'Team Meeting',
-                event_date: '2025-04-03',
-                start_time: '10:00:00',
-                end_time: '11:00:00',
-                description: 'Discuss project updates',
-            },
-        ];
-        api.api_get_all_calendar_events.mockResolvedValue(mockEvents);
-
-        await act(async () => {
-            render(<CalendarTriple />);
-        });
-
-        const event = screen.getByText('Team Meeting');
-        fireEvent.doubleClick(event);
-
-        const titleInput = screen.getByPlaceholderText('Event Title');
-        fireEvent.change(titleInput, { target: { value: 'Updated Meeting' } });
-
-        fireEvent.click(screen.getByText('Save Changes'));
-
-        expect(api.api_update_calendar_event).toHaveBeenCalledTimes(1);
-        expect(api.api_update_calendar_event).toHaveBeenCalledWith(
-            1,
-            expect.objectContaining({
-                title: 'Updated Meeting',
-            })
-        );
-    });
-
-    test('deletes an event', async () => {
-        const mockEvents = [
-            {
-                id: 1,
-                title: 'Team Meeting',
-                event_date: '2025-04-03',
-                start_time: '10:00:00',
-                end_time: '11:00:00',
-                description: 'Discuss project updates',
-            },
-        ];
-        api.api_get_all_calendar_events.mockResolvedValue(mockEvents);
-
-        await act(async () => {
-            render(<CalendarTriple />);
-        });
-
-        const event = screen.getByText('Team Meeting');
-        fireEvent.doubleClick(event);
-
-        fireEvent.click(screen.getByText('Delete'));
-
-        expect(api.api_delete_calendar_event).toHaveBeenCalledTimes(1);
-        expect(api.api_delete_calendar_event).toHaveBeenCalledWith(1);
-    });
-
-    test('opens the notes editor', async () => {
-        const mockEvents = [
-            {
-                id: 1,
-                title: 'Team Meeting',
-                event_date: '2025-04-03',
-                start_time: '10:00:00',
-                end_time: '11:00:00',
-                description: 'Discuss project updates',
-            },
-        ];
-        api.api_get_all_calendar_events.mockResolvedValue(mockEvents);
-
-        await act(async () => {
-            render(<CalendarTriple />);
-        });
-
-        const event = screen.getByText('Team Meeting');
-        fireEvent.doubleClick(event);
-
-        fireEvent.click(screen.getByText('Add Notes'));
-
-        expect(screen.getByText('Notes Editor')).toBeInTheDocument();
-    });
-
-    test('saves notes for an event', async () => {
-        const mockEvents = [
-            {
-                id: 1,
-                title: 'Team Meeting',
-                event_date: '2025-04-03',
-                start_time: '10:00:00',
-                end_time: '11:00:00',
-                description: 'Discuss project updates',
-            },
-        ];
-        api.api_get_all_calendar_events.mockResolvedValue(mockEvents);
-
-        await act(async () => {
-            render(<CalendarTriple />);
-        });
-
-        const event = screen.getByText('Team Meeting');
-        fireEvent.doubleClick(event);
-
-        fireEvent.click(screen.getByText('Add Notes'));
-
-        const notesEditor = screen.getByText('Notes Editor');
-        fireEvent.change(notesEditor, { target: { value: 'New Notes' } });
-
-        fireEvent.click(screen.getByText('Save'));
-
-        expect(api.api_update_calendar_event).toHaveBeenCalledTimes(1);
-        expect(api.api_update_calendar_event).toHaveBeenCalledWith(
-            1,
-            expect.objectContaining({
-                description: 'New Notes',
-            })
-        );
-    });
-
-    test('deletes notes for an event', async () => {
-        const mockEvents = [
-            {
-                id: 1,
-                title: 'Team Meeting',
-                event_date: '2025-04-03',
-                start_time: '10:00:00',
-                end_time: '11:00:00',
-                description: 'Discuss project updates',
-            },
-        ];
-        api.api_get_all_calendar_events.mockResolvedValue(mockEvents);
-
-        await act(async () => {
-            render(<CalendarTriple />);
-        });
-
-        const event = screen.getByText('Team Meeting');
-        fireEvent.doubleClick(event);
-
-        fireEvent.click(screen.getByText('Add Notes'));
-
-        fireEvent.click(screen.getByText('Delete Notes'));
-
-        expect(api.api_update_calendar_event).toHaveBeenCalledTimes(1);
-        expect(api.api_update_calendar_event).toHaveBeenCalledWith(
-            1,
-            expect.objectContaining({
-                description: '',
-            })
-        );
-    });
-});
+export default CalendarTriple;

@@ -2,7 +2,7 @@ import express from 'express';
 import cors from 'cors';
 import authRouter from './routes/authRoutes.js';
 
-import { getEvents, getEvent, createEvent, updateEvent, deleteEvent, getTodos, getTodo, createTodo, deleteCheckedTodos, getNotes, getNote, createNote, updateNote, deleteNote, getComments, getComment, createComment, updateComment, deleteComment, getUsers, getUser, createUser, updateUser, deleteUser } from './database.js';
+import { getEvents, getEvent, createEvent, updateEvent, deleteEvent, getTodos, getTodo, createTodo, deleteTodo, updateTodo, getNotes, getNote, createNote, updateNote, deleteNote, getComments, getComment, createComment, updateComment, deleteComment, getUsers, getUser, createUser, updateUser, deleteUser, getTheme, updateTheme } from './database.js';
 
 const app = express();
 
@@ -117,7 +117,7 @@ app.post("/todo_item", async (req, res) => {
 app.delete("/todo_item/:id", async (req, res) => {
     try {
         const id = req.params.id;
-        const item = await deleteCheckedTodos(id);
+        const item = await deleteTodo(id);
         res.json(item);
     } catch (error) {
         console.error(error);
@@ -125,6 +125,16 @@ app.delete("/todo_item/:id", async (req, res) => {
     }
 });
 
+app.put("/todo_item/:id", async (req, res) => {
+    try {
+        const id = req.params.id;
+        const updatedTodo = await updateTodo(id, req.body);
+        res.json(updatedTodo);
+    } catch (error) {
+        console.error(error);
+        res.status(404).json({ error: error.message });
+    }
+});
 //----------------------------------------------
 // note
 //----------------------------------------------
@@ -327,3 +337,43 @@ app.listen(8080, () => {
     console.log('Server is running on port http://localhost:8080');
 });
 
+//----------------------------------------------
+// theme - GET (single theme)
+//----------------------------------------------
+app.get("/theme/:id_theme", async (req, res) => {
+    try {
+        const id_theme = req.params.id_theme;
+        console.log(`Fetching theme with id: ${id_theme}`);
+        const theme = await getTheme(id_theme);
+        if (!theme) {
+            console.log(`Theme not found: ${id_theme}`);
+            return res.status(404).json({ error: 'Theme not found' });
+        }
+        res.json(theme);
+    } catch (error) {
+        console.error('Error fetching theme:', error);
+        res.status(500).json({ error: 'An error occurred while fetching the theme' });
+    }
+});
+
+//----------------------------------------------
+// theme - PUT (update theme)
+//----------------------------------------------
+app.put("/theme/:id_theme", async (req, res) => {
+    try {
+        const id_theme = req.params.id_theme;
+        const { name } = req.body;
+        if (!name) {
+            return res.status(400).json({ error: 'Theme name is required' });
+        }
+        const updatedRows = await updateTheme(id_theme, name);
+        if (updatedRows === 0) {
+            return res.status(404).json({ error: 'Theme not found' });
+        }
+        const theme = await getTheme(id_theme);
+        res.json(theme);
+    } catch (error) {
+        console.error('Error updating theme:', error);
+        res.status(500).json({ error: 'An error occurred while updating the theme' });
+    }
+});

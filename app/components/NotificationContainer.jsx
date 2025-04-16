@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react"
 import { Bell, Trash2, Clock, ChevronDown, ChevronUp } from "lucide-react"
-import { Button, Badge, Card, CardBody, Popover, PopoverTrigger,PopoverContent } from "@heroui/react"
+import { Button, Badge, Card, CardBody, Popover, PopoverTrigger, PopoverContent } from "@heroui/react"
 import { ScrollArea } from "@radix-ui/react-scroll-area"
 
 export const NotificationType = {
@@ -11,80 +11,112 @@ export const NotificationType = {
   SUCCESS: "success",
 }
 
-// Initial notifications for testing
-const initialNotifications = [
-  {
-    id: 1,
-    title: "Naujas pranešimas",
-    description:
-      "Šis pranešimas yra svarbus ir jums reikėtų jį perskaityti. Čia yra daugiau informacijos apie šį pranešimą, kurią galite pamatyti išplėtę pranešimą.",
-    time: new Date(Date.now() - 1000 * 60 * 5), // 5 minutes ago
-    read: false,
-    type: NotificationType.INFO,
-  },
-  {
-    id: 2,
-    title: "Sėkmingai atlikta",
-    description: "Jūsų užklausa buvo sėkmingai įvykdyta. Dėkojame už jūsų kantrybę.",
-    time: new Date(Date.now() - 1000 * 60 * 30), // 30 minutes ago
-    read: true,
-    type: NotificationType.SUCCESS,
-  },
-  {
-    id: 3,
-    title: "Dėmesio",
-    description: "Jūsų paskyros nustatymai buvo atnaujinti. Prašome patikrinti, ar viskas veikia tinkamai.",
-    time: new Date(Date.now() - 1000 * 60 * 60 * 2), // 2 hours ago
-    read: false,
-    type: NotificationType.WARNING,
-  },
-]
-
 export default function NotificationContainer({ newNotification }) {
-  const [notifications, setNotifications] = useState(initialNotifications)
+  // Load notifications from localStorage when component mounts
+  const [notifications, setNotifications] = useState(() => {
+    if (typeof window !== "undefined") {
+      const saved = localStorage.getItem("notifications")
+      return saved ? JSON.parse(saved) : []
+    }
+    return []
+  })
+
   const [expandedIds, setExpandedIds] = useState([])
   const [isOpen, setIsOpen] = useState(false)
-
-  // Check if browser supports notifications
   const [notificationsSupported, setNotificationsSupported] = useState(false)
   const [permission, setPermission] = useState(null)
 
+  // Initialize notification support and permission
   useEffect(() => {
     if (typeof window !== "undefined" && "Notification" in window) {
       setNotificationsSupported(true)
       setPermission(Notification.permission)
+      
+      // Request permission if not already set
+      if (Notification.permission === "default") {
+        Notification.requestPermission().then(setPermission)
+      }
     }
   }, [])
 
-  // Add new notification when prop changes
+  // Save notifications to localStorage whenever they change
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      localStorage.setItem("notifications", JSON.stringify(notifications))
+    }
+  }, [notifications])
+
+  // Handle new notification from props
   useEffect(() => {
     if (newNotification) {
-      // Add the new notification to the beginning of the list
-      setNotifications((prev) => [
-        {
-          ...newNotification,
-          id: newNotification.id || Date.now(), // Ensure it has an ID
-          time: newNotification.time || new Date(), // Ensure it has a timestamp
-          read: false, // Always mark new notifications as unread
-        },
-        ...prev,
-      ])
-
-      // Open the notification panel when a new notification arrives
-      setIsOpen(true)
-
-      // Send browser notification if supported
-      if (notificationsSupported && permission === "granted") {
-        new Notification(newNotification.title, { body: newNotification.description })
-      }
+      addNotification({
+        ...newNotification,
+        id: newNotification.id || Date.now(),
+        time: newNotification.time || new Date(),
+        read: false,
+      })
     }
-  }, [newNotification, notificationsSupported, permission])
+  }, [newNotification])
 
-  // Count unread notifications
-  const unreadCount = notifications.filter((n) => !n.read).length
+  // Add a new notification
+  const addNotification = (notification) => {
+    setNotifications(prev => [notification, ...prev])
+    setIsOpen(true)
+    
+    if (notificationsSupported && permission === "granted") {
+      new Notification(notification.title, { 
+        body: notification.description 
+      })
+    }
+  }
 
-  // Format time to relative format (e.g., "5 min ago")
-  const formatRelativeTime = (date) => {
+  // Delete a notification
+  const deleteNotification = (id) => {
+    setNotifications(prev => prev.filter(n => n.id !== id))
+  }
+
+  // Mark notification as read
+  const markAsRead = (id) => {
+    setNotifications(prev =>
+      prev.map(n => 
+        n.id === id ? { ...n, read: true } : n
+      )
+    )
+  }
+
+  // Toggle expanded state
+  const toggleExpand = (id) => {
+    setExpandedIds(prev => 
+      prev.includes(id) 
+        ? prev.filter(i => i !== id) 
+        : [...prev, id]
+    )
+    markAsRead(id)
+  }
+
+  // Remind later - adds 1 hour to the time
+  const remindLater = (id) => {
+    setNotifications(prev =>
+      prev.map(n => 
+        n.id === id 
+          ? { 
+              ...n, 
+              time: new Date(Date.now() + 3600000), 
+              read: false 
+            } 
+          : n
+      )
+    )
+  }
+
+  // Clear all notifications
+  const clearAll = () => {
+    setNotifications([])
+  }
+
+  // Format time to relative format
+  const formatRelativeTime = (dateString) => {
+    const date = new Date(dateString)
     const now = new Date()
     const diffInSeconds = Math.floor((now - date) / 1000)
 
@@ -94,56 +126,25 @@ export default function NotificationContainer({ newNotification }) {
     return `${Math.floor(diffInSeconds / 86400)} d.`
   }
 
-  // Toggle expanded state for a notification
-  const toggleExpand = (id) => {
-    setExpandedIds((prev) => (prev.includes(id) ? prev.filter((expandedId) => expandedId !== id) : [...prev, id]))
-  }
-
-  // Delete a notification
-  const deleteNotification = (id) => {
-    setNotifications((prev) => prev.filter((notification) => notification.id !== id))
-  }
-
-  // Mark as "remind later" - adds 1 hour to the time and marks as unread
-  const remindLater = (id) => {
-    setNotifications((prev) =>
-      prev.map((notification) => {
-        if (notification.id === id) {
-          return {
-            ...notification,
-            time: new Date(Date.now() + 1000 * 60 * 60), // 1 hour from now
-            read: false,
-          }
-        }
-        return notification
-      }),
-    )
-  }
-
-  // Get badge color based on notification type
+  // Get badge color based on type
   const getBadgeVariant = (type) => {
     switch (type) {
-      case NotificationType.WARNING:
-        return "warning"
-      case NotificationType.SUCCESS:
-        return "success"
-      default:
-        return "default"
+      case NotificationType.WARNING: return "warning"
+      case NotificationType.SUCCESS: return "success"
+      default: return "default"
     }
   }
 
+  const unreadCount = notifications.filter(n => !n.read).length
+
   return (
     <div className="relative">
-      {/* Bell icon with notification count badge */}
       <Popover open={isOpen} onOpenChange={setIsOpen}>
         <PopoverTrigger asChild>
-          <Button variant="ghost" size="icon" className="relative">
+          <Button size="icon" className="relative bg-transparent hover:bg-gray-600 hover:bg-opacity-20 p-1 rounded-xl">
             <Bell className="h-5 w-5" />
             {unreadCount > 0 && (
-              <Badge
-                variant="destructive"
-                className="absolute -top-1 -right-1 h-5 w-5 flex items-center justify-center p-0 text-xs"
-              >
+              <Badge variant="destructive" className="absolute -top-1 -right-1 h-5 w-5 flex items-center justify-center p-0 text-xs">
                 {unreadCount}
               </Badge>
             )}
@@ -154,7 +155,7 @@ export default function NotificationContainer({ newNotification }) {
             <div className="flex items-center justify-between p-4 border-b">
               <h3 className="font-medium">Pranešimai</h3>
               {notifications.length > 0 && (
-                <Button variant="ghost" size="sm" onClick={() => setNotifications([])}>
+                <Button variant="ghost" size="sm" onClick={clearAll}>
                   Išvalyti visus
                 </Button>
               )}
@@ -164,7 +165,7 @@ export default function NotificationContainer({ newNotification }) {
                 <div className="py-6 text-center text-muted-foreground">Nėra pranešimų</div>
               ) : (
                 <ScrollArea className="h-[400px]">
-                  {notifications.map((notification) => (
+                  {notifications.map(notification => (
                     <div
                       key={notification.id}
                       className={`p-4 border-b last:border-b-0 ${notification.read ? "" : "bg-muted/30"}`}
@@ -173,11 +174,14 @@ export default function NotificationContainer({ newNotification }) {
                         <div className="flex-1">
                           <div className="flex items-center gap-2">
                             <h4 className="font-medium">{notification.title}</h4>
-                            <Badge variant={getBadgeVariant(notification.type)}>{notification.type}</Badge>
+                            <Badge variant={getBadgeVariant(notification.type)}>
+                              {notification.type}
+                            </Badge>
                           </div>
-                          <p className="text-xs text-muted-foreground mt-1">{formatRelativeTime(notification.time)}</p>
+                          <p className="text-xs text-muted-foreground mt-1">
+                            {formatRelativeTime(notification.time)}
+                          </p>
 
-                          {/* Description - collapsed or expanded */}
                           <div className="mt-2">
                             {expandedIds.includes(notification.id) ? (
                               <p className="text-sm">{notification.description}</p>
@@ -187,7 +191,6 @@ export default function NotificationContainer({ newNotification }) {
                           </div>
                         </div>
 
-                        {/* Delete button */}
                         <Button
                           variant="ghost"
                           size="icon"
@@ -198,7 +201,6 @@ export default function NotificationContainer({ newNotification }) {
                         </Button>
                       </div>
 
-                      {/* Action buttons */}
                       <div className="flex items-center justify-between mt-2">
                         <Button
                           variant="outline"
@@ -240,4 +242,3 @@ export default function NotificationContainer({ newNotification }) {
     </div>
   )
 }
-

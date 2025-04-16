@@ -96,11 +96,29 @@ export async function createTodo({ title, is_checked, start_date, start_time, en
     return getTodo(id);
 }
 
-export async function deleteCheckedTodos(id) {
+export async function deleteTodo(id) {
     const [result] = await pool.query(`
         DELETE FROM todo_item
         WHERE id = ?`, [id]);
     return result.affectedRows > 0;
+}
+
+export async function updateTodo(id, { title, is_checked, start_date, start_time, end_date, end_time, fk_dashboard, fk_app_user }) {
+    const [result] = await pool.query(`
+        UPDATE todo_item
+        SET title = ?, 
+            is_checked = ?, 
+            start_date = ?, 
+            start_time = ?, 
+            end_date = ?, 
+            end_time = ?, 
+            fk_dashboard = ?, 
+            fk_app_user = ?
+        WHERE id = ?`,
+        [title, is_checked, start_date, start_time, end_date, end_time, fk_dashboard, fk_app_user, id]
+    );
+
+    return getTodo(id);
 }
 
 //----------------------------------------------
@@ -272,3 +290,27 @@ export async function deleteUser(login_name) {
     }
 }
 
+
+
+export async function getTheme(id) {
+    try {
+        const [rows] = await pool.query('SELECT * FROM theme WHERE id_theme = ?', [id]);
+        return rows[0];
+    } catch (error) {
+        console.error('Error fetching theme:', error);
+        throw error;
+    }
+}
+
+export async function updateTheme(id, name) {
+    try {
+        const [result] = await pool.query(
+            'UPDATE theme SET name = ? WHERE id_theme = ?',
+            [name, id]
+        );
+        return result.affectedRows;
+    } catch (error) {
+        console.error('Error updating theme:', error);
+        throw error;
+    }
+}

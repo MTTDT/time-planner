@@ -9,13 +9,21 @@ import avatar_dm from '../assets/default-avatar-dm.png';
 import '../globals.css';
 import NotificationContainer from './NotificationContainer';
 import UserBox from './UserBox';
+import { api_update_theme } from '../api_req';
 
 const TopMenu = ({ theme, setTheme }) => {
     const [isUserBoxOpen, setIsUserBoxOpen] = useState(false);
     const username = "JohnDoe"; // Replace with actual username from your app's state
 
-    const toggleMode = () => {
-        theme === 'light' ? setTheme('dark') : setTheme('light');
+    const toggleMode = async() => {
+         const newTheme = theme === 'light' ? 'dark' : 'light';
+        try {
+            await api_update_theme(1, { name: newTheme }); // Note: using 'name' as the property
+            setTheme(newTheme);
+        } catch (error) {
+            console.error('Failed to update theme:', error);
+            // Optionally show error to user
+        }
     };
 
     const toggleUserBox = () => {

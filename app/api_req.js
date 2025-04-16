@@ -95,13 +95,131 @@ export async function api_delete_calendar_event(eventId) {
       throw error; // Re-throw to allow calling code to handle
   }
 }
-  // Usage:
-//   const newEvent = await api_add_calendar_event({
-//     title: 'Meeting',
-//     description: 'Team sync',
-//     event_date: '2023-12-25',
-//     start_time: '09:00',
-//     end_time: '10:00',
-//   });
-//   console.log(newEvent);
-export {api_add_calendar_event, api_get_calendar_event_by_id, api_get_all_calendar_events, api_update_calendar_event, api_delete_calendar_event}
+// Fetch all todo items
+async function api_get_all_todo_items() {
+  try {
+      const response = await fetch('http://localhost:8080/todo_item');
+      if (!response.ok) throw new Error('Failed to fetch todo items');
+      return await response.json();
+  } catch (error) {
+      console.error('Error fetching todo items:', error);
+      throw error;
+  }
+}
+
+// Fetch a specific todo item by ID
+async function api_get_todo_item_by_id(id) {
+  try {
+      const response = await fetch(`http://localhost:8080/todo_item/${id}`);
+      if (!response.ok) throw new Error('Todo item not found');
+      return await response.json();
+  } catch (error) {
+      console.error(`Error fetching todo item ${id}:`, error);
+      throw error;
+  }
+}
+
+// Add a new todo item
+async function api_add_todo_item({ title, is_checked, start_date, start_time, end_date, end_time, fk_dashboard, fk_app_user }) {
+  try {
+      const response = await fetch('http://localhost:8080/todo_item', {
+          method: 'POST',
+          headers: {
+              'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ title, is_checked, start_date, start_time, end_date, end_time, fk_dashboard, fk_app_user })
+      });
+      if (!response.ok) throw new Error('Failed to create todo item');
+      return await response.json();
+  } catch (error) {
+      console.error('Error creating todo item:', error);
+      throw error;
+  }
+}
+
+// Delete a todo item by ID
+async function api_delete_todo_item(id) {
+  try {
+      const response = await fetch(`http://localhost:8080/todo_item/${id}`, {
+          method: 'DELETE'
+      });
+      if (!response.ok) throw new Error('Failed to delete todo item');
+      return await response.json();
+  } catch (error) {
+      console.error(`Error deleting todo item ${id}:`, error);
+      throw error;
+  }
+}
+
+async function api_update_todo_item(id, { title, is_checked, start_date, start_time, end_date, end_time, fk_dashboard, fk_app_user }) {
+  try {
+      const response = await fetch(`http://localhost:8080/todo_item/${id}`, {
+          method: 'PUT',
+          headers: {
+              'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ title, is_checked, start_date, start_time, end_date, end_time, fk_dashboard, fk_app_user })
+      });
+
+      if (!response.ok) {
+          throw new Error(`Failed to update todo (HTTP ${response.status})`);
+      }
+
+      return await response.json();
+  } catch (error) {
+      console.error(`Error updating todo ${id}:`, error);
+      throw error;
+  }
+}
+
+async function api_get_theme(id) {
+  try {
+      const response = await fetch(`http://localhost:8080/theme/${id}`);
+      
+      if (!response.ok) {
+          throw new Error(`Failed to fetch theme (HTTP ${response.status})`);
+      }
+
+      return await response.json();
+  } catch (error) {
+      console.error(`Error fetching theme ${id}:`, error);
+      throw error;
+  }
+}
+
+async function api_update_theme(id, { name }) {
+  try {
+      const response = await fetch(`http://localhost:8080/theme/${id}`, {
+          method: 'PUT',
+          headers: {
+              'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ name })
+      });
+
+      if (!response.ok) {
+          throw new Error(`Failed to update theme (HTTP ${response.status})`);
+      }
+
+      return await response.json();
+  } catch (error) {
+      console.error(`Error updating theme ${id}:`, error);
+      throw error;
+  }
+}
+
+export 
+{
+  api_get_theme,
+  api_update_theme,
+  api_add_calendar_event, 
+  api_get_calendar_event_by_id, 
+  api_get_all_calendar_events, 
+  api_update_calendar_event, 
+  api_delete_calendar_event,
+  api_add_todo_item,
+  api_delete_todo_item,
+  api_get_todo_item_by_id,
+  api_get_all_todo_items,
+  api_update_todo_item
+}

@@ -1,6 +1,6 @@
 import express from 'express';
 import { connectToDatabase } from '../database.js';
-import bcrypt from 'bcrypt';
+import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import dotenv from 'dotenv';
 dotenv.config();
@@ -46,6 +46,20 @@ router.post('/login', async (req, res) => {
         return res.status(201).json({ token: token });
     } catch (err) {
         return res.status(500).json(err.message);
+    }
+});
+
+router.get('/check-username', async (req, res) => {
+    const { username } = req.query;
+    if (!username) {
+        return res.status(400).json({ available: false, message: "No username provided" });
+    }
+    try {
+        const db = await connectToDatabase();
+        const [rows] = await db.query('SELECT * FROM app_user WHERE login_name = ?', [username]);
+        return res.json({ available: rows.length === 0 });
+    } catch (err) {
+        return res.status(500).json({ available: false, message: "Server error" });
     }
 });
 

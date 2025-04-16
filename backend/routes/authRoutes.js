@@ -2,6 +2,8 @@ import express from 'express';
 import { connectToDatabase } from '../database.js';
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
+import dotenv from 'dotenv';
+dotenv.config();
 
 const router = express.Router();
 
@@ -9,6 +11,7 @@ router.post('/register', async (req, res) => {
     const { username, password } = req.body;
     try {
         const db = await connectToDatabase();
+
         const [rows] = await db.query('SELECT * FROM app_user WHERE login_name = ?', [username]);
         if (rows.length > 0) {
             return res.status(409).json({ message: "Username already taken" });
@@ -25,9 +28,13 @@ router.post('/register', async (req, res) => {
 
 router.post('/login', async (req, res) => {
     const { username, password } = req.body;
+
     try {
         const db = await connectToDatabase();
+
+
         const [rows] = await db.query('SELECT * FROM app_user WHERE login_name = ?', [username]);
+
         if (rows.length === 0) {
             return res.status(404).json({ message: "User does not exist" });
         }
@@ -35,8 +42,7 @@ router.post('/login', async (req, res) => {
         if (!isMatch) {
             return res.status(401).json({ message: "Wrong password" });
         }
-        const token = jwt.sign({id: rows[0].id }, process.env.JWT_KEY, { expiresIn: '2h' });
-
+        const token = jwt.sign({id: rows[0].login_name }, process.env.JWT_KEY, { expiresIn: '2h' });
         return res.status(201).json({ token: token });
     } catch (err) {
         return res.status(500).json(err.message);
@@ -46,6 +52,7 @@ router.post('/login', async (req, res) => {
 const verifyToken = async (req, res, next) => {
     try {
         const token = req.headers['authorization'].split(' ')[1];
+        
         if(!token) {
             return res.status(403).json({message: "No token provided"})
         }
@@ -60,7 +67,8 @@ const verifyToken = async (req, res, next) => {
 router.get('/home', verifyToken, async (req, res) => {
     try {
         const db = await connectToDatabase()
-        const [rows] = await db.query('SELECT * FROM app_user WHERE id = ?', [req.userId])
+        const [rows] = await db.query('SELECT * FROM app_user WHERE login_name = ?', [req.userId])
+        console.log("-------2")
         if(rows.length === 0) {
             return res.status(404).json({message : "User doesn't exist"})
         }

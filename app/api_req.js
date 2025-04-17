@@ -1,13 +1,19 @@
 async function api_get_all_calendar_events() {
-    try {
-      const response = await fetch('http://localhost:8080/calendar_event');
+  try {
+      const token = localStorage.getItem('token'); // Get token from storage
+      const response = await fetch('http://localhost:8080/calendar_event', {
+          headers: {
+              'Authorization': `Bearer ${token}` // Include token in header
+          }
+      });
+      
       if (!response.ok) throw new Error('Failed to fetch events');
       return await response.json();
-    } catch (error) {
+  } catch (error) {
       console.error('Error fetching events:', error);
       throw error;
-    }
   }
+}
   
 //   // Usage:
 //   const allEvents = await api_get_all_calendar_events();
@@ -31,11 +37,14 @@ async function api_get_all_calendar_events() {
 
 
   async function api_add_calendar_event(eventData) {
+    const token = localStorage.getItem('token'); // Get token from storage
+
     try {
       const response = await fetch('http://localhost:8080/calendar_event', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
         },
         body: JSON.stringify(eventData),
       });
@@ -47,7 +56,7 @@ async function api_get_all_calendar_events() {
     }
   }
   async function api_update_calendar_event(eventId, updatedData) {
-    console.log(updatedData)
+    console.log(updatedData, eventId)
     try {
         const response = await fetch(`http://localhost:8080/calendar_event/${eventId}`, {
             method: 'PUT',

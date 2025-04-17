@@ -162,9 +162,9 @@ const SchedulePage = () => {
   return (
     <div className="flex min-h-screen bg-gray-100">
       <Sidebar onToggle={setIsSidebarOpen} />
-      <div className={`flex-1 transition-all duration-300 ${isSidebarOpen ? 'ml-48' : 'ml-16'}`}>
-        <div className="p-8">
-          <div className="flex justify-between mb-6">
+      <div className={`flex-1 m-2 transition-all duration-300 ${isSidebarOpen ? 'md:pl-48 pl-25' : 'md:pl-16 pl-8'}`}>
+        <div className="">
+          <div className="flex flex-col md:flex-row gap-6 mb-6">
             <h1 className="text-2xl font-bold">Class Schedule</h1>
             <div className="space-x-4">
               <button
@@ -190,7 +190,7 @@ const SchedulePage = () => {
               </button>
             </div>
           </div>
-
+          <div className='md:text-lg text-[10px] sm:text-[15px]'>
           <Calendar
             localizer={localizer}
             events={events}
@@ -199,8 +199,12 @@ const SchedulePage = () => {
             defaultView="week"
             views={['week']}
             className="bg-white p-4 rounded-lg shadow h-[700px]"
+            style={{ 
+              height: 700,
+              maxWidth: "100vw",
+          }}
           />
-
+  </div>
           {/* View All Classes Modal */}
           {isListModalOpen && (
             <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">

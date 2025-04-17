@@ -43,6 +43,7 @@ router.post('/login', async (req, res) => {
             return res.status(401).json({ message: "Wrong password" });
         }
         const token = jwt.sign({id: rows[0].login_name }, process.env.JWT_KEY, { expiresIn: '2h' });
+       
         return res.status(201).json({ token: token });
     } catch (err) {
         return res.status(500).json(err.message);
@@ -68,7 +69,6 @@ router.get('/home', verifyToken, async (req, res) => {
     try {
         const db = await connectToDatabase()
         const [rows] = await db.query('SELECT * FROM app_user WHERE login_name = ?', [req.userId])
-        console.log("-------2")
         if(rows.length === 0) {
             return res.status(404).json({message : "User doesn't exist"})
         }

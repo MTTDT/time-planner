@@ -18,6 +18,7 @@ const Login = () => {
     const handleSumbit = async (e) => {
         e.preventDefault()
         try {
+            console.log("--->", values)
             const response = await axios.post('http://localhost:8080/auth/login', values)
             if(response.status === 201) {
                 localStorage.setItem('token', response.data.token)

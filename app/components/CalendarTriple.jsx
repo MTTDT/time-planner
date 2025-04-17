@@ -105,7 +105,17 @@ function CalendarTriple() {
             end: selectedEnd
         });
     };
+    const [isMobile, setIsMobile] = useState(false);
 
+        useEffect(() => {
+        const handleResize = () => {
+            setIsMobile(window.innerWidth < 768);
+        };
+        
+        handleResize(); // Set initial value
+        window.addEventListener('resize', handleResize);
+        return () => window.removeEventListener('resize', handleResize);
+        }, []);
 
     const TimeInput = ({ selected, onChange }) => {
         const [hours, setHours] = useState(selected ? selected.getHours() : 0)
@@ -239,25 +249,27 @@ function CalendarTriple() {
 
         setAllEvents([...allEvents, newEvent]);
         await api_add_calendar_event(convertCalendarEventToDbEvent(newEvent))
-        setNewEvent({ title: "", start: "", end: "", notes: "" });
+        setNewEvent({ title: "", start: "", end: "", notes: "", description: "" });
     }
 
     const handleEventDoubleClick = (event) => {
+        console.log(event)
         setEditingEvent(event);
         setEditForm({
             title: event.title,
             start: new Date(event.start),
             end: new Date(event.end),
-            notes: event.notes || ""
+            notes: event.notes || "",
+            description: event.description || "",
         });
     };
 
-    const handleEditSubmit = () => {
+    const handleEditSubmit = async() => {
         if (!editForm.title || !editForm.start || !editForm.end) {
             alert("Please fill in all fields");
             return;
         }
-
+       
         setAllEvents(allEvents.map(event => 
             event === editingEvent 
                 ? { ...editForm }
@@ -291,14 +303,14 @@ function CalendarTriple() {
 
     const handleSaveNotes = async(notes) => {
         const dbEvent = convertCalendarEventToDbEvent(editingEvent)
-        await api_update_calendar_event(dbEvent.id,
-            {
-                title:dbEvent.title, 
-                description:JSON.stringify(notes),
-                event_date:dbEvent.event_date,
-                start_time:dbEvent.start_time,
-                end_time: dbEvent.end_time
-            })
+        // await api_update_calendar_event(dbEvent.id,
+        //     {
+        //         title:dbEvent.title, 
+        //         description:JSON.stringify(notes),
+        //         event_date:dbEvent.event_date,
+        //         start_time:dbEvent.start_time,
+        //         end_time: dbEvent.end_time
+        //     })
         setEditForm({ ...editForm, notes });
         setIsNotesEditorOpen(false);
     };
@@ -335,8 +347,7 @@ function CalendarTriple() {
     : props.label;
 
         return (
-          <div className="flex justify-between items-center">
-            {/* Left Group: Today Button */}
+        <div className={`flex flex-col items-center space-y-2 md:space-y-0 md:flex-row md:justify-between md:items-center`}>            {/* Left Group: Today Button */}
             <div className="flex">
               <button 
                 type="button" 
@@ -440,7 +451,7 @@ function CalendarTriple() {
                     
                     {/* Main calendar area */}
                     <div className="flex-1">
-                        <div className="overflow-hidden">
+                        <div className="overflow-hidden md:text-lg text-[10px] sm:text-[15px]">
                             
                             <Calendar 
                                 localizer={localizer} 
@@ -449,7 +460,7 @@ function CalendarTriple() {
                                 endAccessor="end" 
                                 style={{ 
                                     height: 700,
-                                    "--rbc-grid-color": "#ff5733", // Orange grid
+                                    maxWidth: "100vw",
                                 }}
                                 defaultView="week"
                                 views={['month', 'week', 'day']}
@@ -464,11 +475,13 @@ function CalendarTriple() {
                                 formats={formats}
                                 eventPropGetter={(event) => ({
                                     style: {
+                                        
                                         background: '#70bcd4',
                                         borderRadius: '4px',
                                         border: 'none',
                                         color: 'white',
                                         padding: '2px 8px',
+                                        
                                     }
                                 })}
                             />

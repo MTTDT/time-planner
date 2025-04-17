@@ -481,6 +481,7 @@ function CalendarTriple() {
                                         border: 'none',
                                         color: 'white',
                                         padding: '2px 8px',
+                                        display: 'block',
                                         
                                     }
                                 })}

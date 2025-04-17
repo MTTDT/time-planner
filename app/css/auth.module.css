@@ -84,3 +84,14 @@
     text-align: center;
     margin-top: 1rem;
   }
+  .error {
+    color: #d32f2f;
+    background: #ffeaea;
+    border: 1px solid #f5c2c7;
+    border-radius: 4px;
+    padding: 8px 12px;
+    margin-bottom: 16px;
+    font-size: 0.95rem;
+    font-weight: 500;
+    display: block;
+  }

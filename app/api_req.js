@@ -1,3 +1,14 @@
+async function api_checkUsername(username) {
+  try {
+    const response = await fetch(`http://localhost:8080/app_user/${username}`);
+    if(response.ok) return true;
+    else return false;
+  } catch (error) {
+    console.error('Error: ', error );
+    throw error;
+  }
+}
+
 async function api_get_all_calendar_events() {
   try {
       const token = localStorage.getItem('token'); // Get token from storage
@@ -219,6 +230,7 @@ async function api_update_theme(id, { name }) {
 
 export 
 {
+  api_checkUsername,
   api_get_theme,
   api_update_theme,
   api_add_calendar_event, 

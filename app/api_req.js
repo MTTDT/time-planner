@@ -1,4 +1,11 @@
-import jwtDecode from 'jwt-decode';
+function getAuthHeader() {
+  const token = localStorage.getItem('token');
+  return {
+    'Authorization': `Bearer ${token}`,
+    'Content-Type': 'application/json'
+  };
+}
+
 async function api_checkUsername(username) {
   try {
     const response = await fetch(`http://localhost:8080/app_user/${username}`);
@@ -10,20 +17,16 @@ async function api_checkUsername(username) {
   }
 }
 
-async function api_get_all_calendar_events() {
+export async function api_get_all_calendar_events() {
   try {
-      const token = localStorage.getItem('token'); // Get token from storage
-      const response = await fetch('http://localhost:8080/calendar_event', {
-          headers: {
-              'Authorization': `Bearer ${token}` // Include token in header
-          }
-      });
-      
-      if (!response.ok) throw new Error('Failed to fetch events');
-      return await response.json();
+    const response = await fetch('http://localhost:8080/calendar_event', {
+      headers: getAuthHeader()
+    });
+    if (!response.ok) throw new Error('Failed to fetch events');
+    return await response.json();
   } catch (error) {
-      console.error('Error fetching events:', error);
-      throw error;
+    console.error('Error fetching events:', error);
+    throw error;
   }
 }
 export async function api_get_event_partisipants(id) {
@@ -305,7 +308,6 @@ export
   api_update_theme,
   api_add_calendar_event, 
   api_get_calendar_event_by_id, 
-  api_get_all_calendar_events, 
   api_update_calendar_event, 
   api_add_todo_item,
   api_delete_todo_item,

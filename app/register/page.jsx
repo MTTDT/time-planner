@@ -38,7 +38,7 @@ const Register = () => {
         setConfirmPassword(e.target.value);
     }
 
-    const handleSumbit = async (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault();
         setSubmitted(true);
         const newErrors = [];
@@ -83,7 +83,7 @@ const Register = () => {
         <div className={style.container}>
             <div className={style.formContainer}>
                 <h2 className={style.title}>Sign Up</h2>
-                <form onSubmit={handleSumbit}>
+                <form onSubmit={handleSubmit}>
                     <div className="mb-4" style={{ position: "relative" }}>
                         <div style={{ position: "relative" }}>
                             <input

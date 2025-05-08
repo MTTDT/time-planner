@@ -39,7 +39,8 @@ const Login = () => {
         try {
             const response = await axios.post('http://localhost:8080/auth/login', values)
             if (response.status === 201) {
-                localStorage.setItem('token', response.data.token)
+                localStorage.setItem('token', response.data.token);
+                localStorage.setItem('username', values.username);
                 router.push('/')
             }
         } catch (err) {

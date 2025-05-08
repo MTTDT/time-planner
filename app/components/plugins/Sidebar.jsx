@@ -41,8 +41,6 @@ const Sidebar = ({ onToggle }) => {
             </button>
           </Link>
 
-
-
           {/* Graduation Link */}
           <Link href="/schedule" className="w-full no-underline">
             <button className="flex w-full items-center p-4 hover:bg-gray-700 text-white">

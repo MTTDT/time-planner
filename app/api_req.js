@@ -1,3 +1,11 @@
+function getAuthHeader() {
+  const token = localStorage.getItem('token');
+  return {
+    'Authorization': `Bearer ${token}`,
+    'Content-Type': 'application/json'
+  };
+}
+
 async function api_checkUsername(username) {
   try {
     const response = await fetch(`http://localhost:8080/app_user/${username}`);
@@ -9,20 +17,16 @@ async function api_checkUsername(username) {
   }
 }
 
-async function api_get_all_calendar_events() {
+export async function api_get_all_calendar_events() {
   try {
-      const token = localStorage.getItem('token'); // Get token from storage
-      const response = await fetch('http://localhost:8080/calendar_event', {
-          headers: {
-              'Authorization': `Bearer ${token}` // Include token in header
-          }
-      });
-      
-      if (!response.ok) throw new Error('Failed to fetch events');
-      return await response.json();
+    const response = await fetch('http://localhost:8080/calendar_event', {
+      headers: getAuthHeader()
+    });
+    if (!response.ok) throw new Error('Failed to fetch events');
+    return await response.json();
   } catch (error) {
-      console.error('Error fetching events:', error);
-      throw error;
+    console.error('Error fetching events:', error);
+    throw error;
   }
 }
   

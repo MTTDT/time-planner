@@ -13,7 +13,7 @@ const Sidebar = ({ onToggle }) => {
   return (
     <div
       className={`fixed left-0 top-0 h-screen bg-gray-800 text-white transition-all duration-300 ${
-        isOpen ? 'w-48' : 'w-16'
+        isOpen ? 'md:w-48 w-25' : 'md:w-16 w-8'
       } z-50`}
     >
       <div className="flex h-full flex-col">
@@ -40,8 +40,6 @@ const Sidebar = ({ onToggle }) => {
               {isOpen && <span className="ml-4 text-white">Notebook</span>}
             </button>
           </Link>
-
-
 
           {/* Graduation Link */}
           <Link href="/schedule" className="w-full no-underline">

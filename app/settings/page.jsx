@@ -1,5 +1,5 @@
 "use client";
-
+import React from "react";
 import { useTheme } from "../context/ThemeContext";
 import Sidebar from "../components/plugins/Sidebar";
 

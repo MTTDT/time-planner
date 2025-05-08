@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react"
 import { Bar, BarChart, CartesianGrid, XAxis, YAxis, ResponsiveContainer } from "recharts"
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart"
-import { Button } from "@heroui/react"
+import { button } from "@heroui/react"
 import { ArrowLeft, ChevronLeft, ChevronRight } from "lucide-react"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { getAllPoints } from "../components/pointsStorage"
@@ -289,10 +289,10 @@ const Page = () => {
           <div className=" mx-[150px]">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
-              <Button variant="outline" size="sm" onClick={handleBackClick} className="mb-2">
+              <button variant="outline" size="sm" onClick={handleBackClick} className="mb-2">
                 <ArrowLeft className="h-4 w-4 mr-2" />
                 Back to Days
-              </Button>
+              </button>
               {/* <h2 className="text-2xl font-bold">Hourly Breakdown for {formatDate(selectedDay)}</h2> */}
             </div>
           </div>
@@ -335,13 +335,13 @@ const Page = () => {
 
             <div className="flex items-center gap-4">
               <div className="flex items-center">
-                <Button variant="outline" size="icon" onClick={handlePrevious}>
+                <button variant="outline" size="icon" onClick={handlePrevious}>
                   <ChevronLeft className="h-4 w-4" />
-                </Button>
+                </button>
                 <div className="px-2 text-sm font-medium">{formatDateRange()}</div>
-                <Button variant="outline" size="icon" onClick={handleNext}>
+                <button variant="outline" size="icon" onClick={handleNext}>
                   <ChevronRight className="h-4 w-4" />
-                </Button>
+                </button>
               </div>
 
               <Select value={timeRange} onValueChange={handleTimeRangeChange}>

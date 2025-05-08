@@ -7,7 +7,20 @@ import dm_cal from '../assets/calendar-star-solid-120.png';
 import '../globals.css';
 import NotificationContainer from './NotificationContainer';
 import { api_update_theme } from '../api_req';
-
+import jwtDecode from 'jwt-decode';
+const getUsernameFromToken = (token) => {
+    if (!token) return null;
+    try {
+        // Split token into parts and decode the payload (middle part)
+        const base64Url = token.split('.')[1];
+        const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+        const payload = JSON.parse(atob(base64));
+        return payload.id; // Returns the username
+    } catch (e) {
+        console.error("Failed to decode token", e);
+        return null;
+    }
+}
 const TopMenu = ({ theme, setTheme }) => {
     const [isUserBoxOpen, setIsUserBoxOpen] = useState(false);
     const [username, setUsername] = useState('');

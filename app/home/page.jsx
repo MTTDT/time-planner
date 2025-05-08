@@ -20,6 +20,8 @@ const Home = () => {
     const fetchUser = async () => {
         try {
             const token = localStorage.getItem('token');
+            console.log(token)
+
             const response = await axios.get('http://localhost:8080/auth/home', {
                 headers: {
                     "Authorization": `Bearer ${token}`
@@ -69,13 +71,14 @@ const Home = () => {
             }}
         >
             <Sidebar onToggle={setIsSidebarOpen} />
-            <div className={`flex-1 transition-all duration-300 ${isSidebarOpen ? "pl-48" : "pl-16"}`}>
+            <div className={`flex-1 transition-all duration-300 ${isSidebarOpen ? 'md:pl-48 pl-25' : 'md:pl-16 pl-8'}`}>
                 <TopMenu
                     theme={theme}
                     setTheme={setTheme}
                     onHomeClick={() => setCurrentView("home")}
                 />
-                <CalendarTriple />
+                <div className="w-[95%] mx-auto"><CalendarTriple /></div>
+                
                 <UI
                     themeColor={themeColor}
                     setThemeColor={() => { }}

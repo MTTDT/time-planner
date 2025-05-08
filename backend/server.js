@@ -1,8 +1,11 @@
 import express from 'express';
 import cors from 'cors';
 import authRouter from './routes/authRoutes.js';
+import jwt from 'jsonwebtoken';
+import dotenv from 'dotenv';
+dotenv.config();
 
-import { getEvents, getEvent, createEvent, updateEvent, deleteEvent, getTodos, getTodo, createTodo, deleteTodo, updateTodo, getNotes, getNote, createNote, updateNote, deleteNote, getComments, getComment, createComment, updateComment, deleteComment, getUsers, getUser, createUser, updateUser, deleteUser, getTheme, updateTheme } from './database.js';
+import { getEvents, getEventPrtisipants, getEvent, createEvent, updateEvent, deleteEvent, getTodos, getTodo, createTodo, deleteTodo, updateTodo, getNotes, getNote, createNote, updateNote, deleteNote, getComments, getComment, createComment, updateComment, deleteComment, getUsers, getUser, createUser, updateUser, deleteUser, getTheme, updateTheme, creatEventMember, deleteEventMember } from './database.js';
 
 const app = express();
 
@@ -20,21 +23,47 @@ app.get('/', (req, res) => {
     console.log("req.body")
 })
 
+const verifyToken = (req, res, next) => {
+
+    try {
+        const token = req.headers['authorization']?.split(' ')[1];
+
+        
+        if (!token) {
+            return res.status(403).json({ message: "No token provided" });
+        }
+        console.log("----1")
+
+        const decoded = jwt.verify(token, process.env.JWT_KEY);
+        console.log("----2")
+
+        req.userId = decoded.id; // Attach user ID to request
+
+
+        next();
+    } catch (err) {
+        return res.status(401).json({ message: "Unauthorized" });
+    }
+}
+
 //----------------------------------------------
 // calendar_event
 //----------------------------------------------
-app.get("/calendar_event", async (req, res) => {
+app.get('/calendar_event', verifyToken, async (req, res) => {
     try {
-        const events = await getEvents();
+        console.log("/calendar_event");
+        const events = await getEvents(req.userId); // Pass the entire request object
         res.json(events);
-    } catch (error) {
-        console.error(error);
-        res.status(500).json({ error: 'An error occurred while fetching events' });
+    } catch (err) {
+        res.status(500).json({ message: err.message });
     }
 });
 
 app.get("/calendar_event/:id", async (req, res) => {
+
     try {
+        console.log("/calendar_event/:id");
+
         const id = req.params.id;
         const event = await getEvent(id);
         res.json(event);
@@ -44,10 +73,26 @@ app.get("/calendar_event/:id", async (req, res) => {
     }
 });
 
-app.post("/calendar_event", async (req, res) => {
+app.get("/calendar_event_p/:id", async (req, res) => {
+    try {
+        console.log("/calendar_event_p/:id");
+
+        const id = req.params.id;
+        const event = await getEventPrtisipants(id);
+        
+        res.json(event);
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ error: 'An error occurred while fetching the event' });
+    }
+});
+
+app.post("/calendar_event", verifyToken, async (req, res) => {
+
     try {
         const { title, description, event_date, start_time, end_time } = req.body;
-        const event = await createEvent({ title, description, event_date, start_time, end_time });
+        const userId = req.userId;
+        const event = await createEvent({ title, description, event_date, start_time, end_time, userId}); // Pass the user ID
         res.status(201).json(event);
     } catch (error) {
         console.error(error);
@@ -59,6 +104,8 @@ app.put("/calendar_event/:id", async (req, res) => {
     try {
         const id = req.params.id;
         const { title, description, event_date, start_time, end_time } = req.body;
+        console.log(req.body,"aha")
+        console.log(id)
         const event = await updateEvent(id, { title, description, event_date, start_time, end_time });
         res.json(event);
     } catch (error) {
@@ -377,3 +424,29 @@ app.put("/theme/:id_theme", async (req, res) => {
         res.status(500).json({ error: 'An error occurred while updating the theme' });
     }
 });
+
+///members
+app.post("/event_members", verifyToken, async (req, res) => {
+
+    try {
+        const userId = req.body.userId;
+        const eventId = req.body.eventId
+        const event = await creatEventMember(userId, eventId); // Pass the user ID
+        res.json(event);
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ error: 'An error occurred while creating the event' });
+    }
+});
+app.delete("/event_members", async (req, res) => {
+
+    try {
+        const userId = req.body.userId;
+        const event = await deleteEventMember(userId); // Pass the user ID
+        res.json(event);
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ error: 'An error occurred while deleting the event' });
+    }
+});
+

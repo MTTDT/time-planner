@@ -22,15 +22,21 @@ const Register = () => {
     const passwordIsValid = (password) => /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{8,}$/.test(password);
 
     const handleChanges = async (e) => {
-        setValues({ ...values, [e.target.name]: e.target.value });
+        // Prevent spaces in username
         if (e.target.name === "username") {
+            const value = e.target.value.replace(/\s/g, ''); // Remove all spaces
+            setValues({ ...values, [e.target.name]: value });
             setUsernameTouched(true);
-            if (usernameIsValid(e.target.value)) {
-                const taken = await api_checkUsername(e.target.value);
+            
+            if (usernameIsValid(value)) {
+                const taken = await api_checkUsername(value);
                 setUsernameTaken(taken);
             } else {
                 setUsernameTaken(null);
             }
+        } else {
+            // Normal handling for other fields
+            setValues({ ...values, [e.target.name]: e.target.value });
         }
     }
 

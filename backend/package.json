@@ -4,7 +4,9 @@
   "type": "module",
   "main": "database.js",
   "scripts": {
-    "dev": "npx nodemon server.js"
+    "dev": "npx nodemon server.js",
+    "lint": "eslint server.js",
+    "lint:fix": "eslint --fix server.js"
   },
   "keywords": [],
   "author": "",
@@ -18,5 +20,11 @@
     "jsonwebtoken": "^9.0.2",
     "mysql2": "^3.13.0",
     "nodemon": "^3.1.9"
+  },
+  "devDependencies": {
+    "@typescript-eslint/eslint-plugin": "^8.32.0",
+    "@typescript-eslint/parser": "^8.32.0",
+    "eslint": "^9.26.0",
+    "eslint-plugin-custom-rules": "^0.0.0"
   }
 }

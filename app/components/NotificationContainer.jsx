@@ -1,5 +1,5 @@
 "use client"
-
+import React from 'react'
 import { useState, useEffect } from "react"
 import { Bell, Trash2, Clock, ChevronDown, ChevronUp } from "lucide-react"
 import { Button, Badge, Card, CardBody, Popover, PopoverTrigger,PopoverContent } from "@heroui/react"
@@ -187,7 +187,7 @@ export default function NotificationContainer({ newNotification }) {
                           </div>
                         </div>
 
-                        {/* Delete button */}
+                        {/* Delete Button */}
                         <Button
                           variant="ghost"
                           size="icon"
@@ -198,7 +198,7 @@ export default function NotificationContainer({ newNotification }) {
                         </Button>
                       </div>
 
-                      {/* Action buttons */}
+                      {/* Action Buttons */}
                       <div className="flex items-center justify-between mt-2">
                         <Button
                           variant="outline"

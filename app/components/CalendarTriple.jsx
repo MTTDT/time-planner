@@ -8,8 +8,9 @@ import "react-datepicker/dist/react-datepicker.css";
 import enUS from 'date-fns/locale/en-US';
 import "../globals.css";
 import NotesEditor from './NotesEditor';
-import { api_get_calendar_event_by_id, api_add_calendar_event, api_get_all_calendar_events, api_update_calendar_event, api_delete_calendar_event } from "../api_req";
+import { api_get_calendar_event_by_id, api_get_event_partisipants, api_add_calendar_event, api_get_all_calendar_events, api_update_calendar_event, api_delete_calendar_event, api_add_event_member, api_delete_event_member } from "../api_req";
 import { title } from "process";
+import { EditIcon } from "lucide-react";
 
 const locales = {
     "en-US": enUS
@@ -40,10 +41,14 @@ function CalendarTriple() {
         end: null,
         notes: ""
     });
-
+    const [participants, setPaericipants] = useState([])
     const [allEvents, setAllEvents] = useState([]);
     const [selectedDate, setSelectedDate] = useState(null);
     const [editingEvent, setEditingEvent] = useState(null);
+    const [sharing, setSharing] = useState(false)
+    const [sharingUser, setSharingUser] = useState('');
+    const [shareCompleteion, setShareCompletion] = useState('')
+    const [userToRemoveFromSharing, setUserToRemoveFromSharing]=useState('')
     const [editForm, setEditForm] = useState({
         id:-1,
         description:"",
@@ -116,6 +121,12 @@ function CalendarTriple() {
         window.addEventListener('resize', handleResize);
         return () => window.removeEventListener('resize', handleResize);
         }, []);
+    
+    async function GetParticipants(event){
+        const participants = await api_get_event_partisipants(event.id)
+        console.log("participants", participants)
+        setPaericipants(participants)
+    }
 
     const TimeInput = ({ selected, onChange }) => {
         const [hours, setHours] = useState(selected ? selected.getHours() : 0)
@@ -255,7 +266,10 @@ function CalendarTriple() {
     const handleEventDoubleClick = (event) => {
         console.log(event)
         setEditingEvent(event);
+        GetParticipants(event)
+
         setEditForm({
+            id:event.id,
             title: event.title,
             start: new Date(event.start),
             end: new Date(event.end),
@@ -292,7 +306,7 @@ function CalendarTriple() {
 
     const handleDeleteEvent = async() => {
         console.log(editingEvent)
-        setAllEvents(allEvents.filter(event => event !== editingEvent));
+        // setAllEvents(allEvents.filter(event => event !== editingEvent));
         api_delete_calendar_event(editingEvent.id)
         handleCancelEdit();
     };
@@ -341,13 +355,38 @@ function CalendarTriple() {
         return {};
     };
 
+    const handleSharing = async () => {
+        if (sharing) {
+         
+            const token = localStorage.getItem('token');
+            await api_add_event_member(sharingUser, editingEvent.id, token);
+            // setShareCompletion('Successfully shared!');
+         
+        } else {
+          setShareCompletion('');
+          setSharingUser('');
+          
+        }
+        setSharing(!sharing);
+      };
+    
+      async function handleDeleteEventMember(){
+        await api_delete_event_member(userToRemoveFromSharing);
+    
+        setPaericipants(prevParticipants => 
+        prevParticipants.filter(p => p !== userToRemoveFromSharing)
+        );
+    
+        setUserToRemoveFromSharing('');
+        
+      }
     const CustomToolbar = (props) => {
         const formattedLabel = props.label 
     ? props.label.split(' ')[0].substring(0, 3) + ' ' + props.label.split(' ').slice(1).join(' ')
     : props.label;
 
         return (
-        <div className={`flex flex-col items-center space-y-2 md:space-y-0 md:flex-row md:justify-between md:items-center`}>            {/* Left Group: Today Button */}
+        <div className={`flex flex-col items-center space-y-2 md:space-y-0 md:flex-row md:justify-between md:items-center`}>            {/* Left Group: Today button */}
             <div className="flex">
               <button 
                 type="button" 
@@ -536,9 +575,60 @@ function CalendarTriple() {
                                     </svg>
                                     {editForm.notes ? "Edit Notes" : "Add Notes"}
                                 </button>
+                                <button
+                                    onClick={handleSharing}
+                                    className="w-full flex items-center justify-center gap-2 px-4 py-2 bg-blue-200 text-amber-800 rounded-lg hover:bg-blue-300 transition"
+                                >
+                                    
+                                    {sharing ? "Share it!" : "Share with"}
+                                </button>
+                                {shareCompleteion && <p>{shareCompleteion}</p>}
+                                {
+                                    sharing && (
+                                        <div className="flex gap-1">
+                                            <input
+                                            placeholder="Enter user name"
+                                            onChange={(e)=>setSharingUser(e.target.value)}
+                                            />
+                                            <select
+                                                value={userToRemoveFromSharing || ''}
+                                                onChange={(e) => {
+                                                    const selectedValue = e.target.value;
+                                                    setUserToRemoveFromSharing(selectedValue || '');
+                                                }}
+                                                >
+                                                <option value="">-- Select user to remove --</option>
+                                                {participants.map((participant) => (
+                                                    <option key={participant} value={participant}>
+                                                    {participant} {/* Adjust to match your participant object structure */}
+                                                    </option>
+                                                ))}
+                                            </select>
+                                           
+                                          
+                                        </div>
+                                        
+                                    )
+                                    
+                                    
+                                    
+                                }
+                                {
+                                    userToRemoveFromSharing != '' &&
+                                        <button
+                                        onClick={handleDeleteEventMember}
+                                        className="w-full flex items-center justify-center gap-2 px-2 py-1  text-amber-800 rounded-lg hover:bg-blue-300 transition"
+                                    >Remove</button>
+                                }
+                                
                             </div>
+                            {
+                                participants.length > 0 && (<p>This event is currently shared with: {participants.join(', ')}</p>)
+                            }
+                            
+
                         </div>
-                        
+                       
                         <div className="bg-gray-50 px-6 py-4 flex justify-end gap-3">
                             <button
                                 onClick={handleDeleteEvent}

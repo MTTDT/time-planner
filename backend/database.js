@@ -42,6 +42,16 @@ export async function getEvents(userId) {
     return rows;
 }
 
+export async function getEventPrtisipants(id){
+    const [users] = await pool.query('SELECT fk_app_user FROM event_members WHERE fk_calendar_Event = ?', [id]);
+
+    const res = users.map(u =>u.fk_app_user)
+    console.log("parts", res)
+
+    return res
+
+}
+
 export async function getEvent(id) {
     const [rows] = await pool.query(`
         SELECT * 
@@ -51,6 +61,16 @@ export async function getEvent(id) {
     return rows[0];
 }
 
+export async function creatEventMember(userId, eventId){
+    await pool.query(`INSERT INTO event_members (fk_app_user, fk_calendar_event) VALUES (?, ?)`, [userId, eventId]);
+
+}
+export async function deleteEventMember(userId) {
+    await pool.query(`
+        DELETE FROM event_members
+        WHERE fk_app_user = ?`, [userId]);
+    }
+
 export async function createEvent({ title, description, event_date, start_time, end_time, userId }) {
 
     const [result] = await pool.query(`
@@ -58,7 +78,7 @@ export async function createEvent({ title, description, event_date, start_time, 
         VALUES (?, ?, ?, ?, ?)`, 
         [title, description, event_date, start_time, end_time]);
     const id = result.insertId;
-    await pool.query(`INSERT INTO event_members (fk_app_user, fk_calendar_event) VALUES (?, ?)`, [userId, result.insertId]);
+    await creatEventMember(userId, id)
     return getEvent(id);
 }
 

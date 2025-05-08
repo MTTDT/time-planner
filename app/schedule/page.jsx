@@ -1,4 +1,5 @@
 "use client"
+import React from 'react';
 import { useState } from 'react';
 import Sidebar from '../components/plugins/Sidebar';
 import { Calendar, dateFnsLocalizer } from 'react-big-calendar';

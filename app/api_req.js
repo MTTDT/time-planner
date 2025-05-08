@@ -1,3 +1,4 @@
+import jwtDecode from 'jwt-decode';
 async function api_checkUsername(username) {
   try {
     const response = await fetch(`http://localhost:8080/app_user/${username}`);
@@ -25,12 +26,40 @@ async function api_get_all_calendar_events() {
       throw error;
   }
 }
+export async function api_get_event_partisipants(id) {
+  const token = localStorage.getItem('token'); // or however you store the token
+  
+  const username = getUsernameFromToken(token)
+  try{
+    const response = await fetch(`http://localhost:8080/calendar_event_p/${id}`);
+    console.log("response", response)
+    if (!response.ok) throw new Error('Failed to fetch event participants');
+    const a = await response.json();
+    const b =a.filter(i=>i !== username)
+    return b;
+  }catch (error) {
+      console.error('Error fetching event partisipants:', error);
+      throw error;
+  }
+}
   
 //   // Usage:
 //   const allEvents = await api_get_all_calendar_events();
 //   console.log(allEvents);
 
-
+const getUsernameFromToken = (token) => {
+  if (!token) return null;
+  try {
+      // Split token into parts and decode the payload (middle part)
+      const base64Url = token.split('.')[1];
+      const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+      const payload = JSON.parse(atob(base64));
+      return payload.id; // Returns the username
+  } catch (e) {
+      console.error("Failed to decode token", e);
+      return null;
+  }
+}
   async function api_get_calendar_event_by_id(id) {
     try {
       const response = await fetch(`http://localhost:8080/calendar_event/${id}`);
@@ -228,6 +257,47 @@ async function api_update_theme(id, { name }) {
   }
 }
 
+export async function api_add_event_member(userId, eventId){
+  const token = localStorage.getItem('token')
+  try {
+    const response = await fetch('http://localhost:8080/event_members', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+
+        },
+        body: JSON.stringify({ userId, eventId })
+    });
+    // if(!response.ok) throw console.error("failed to share")
+    
+    const res = await response.json();
+    return res;
+} catch (error) {
+    console.error('Error creating event member', error);
+    //throw error;
+}
+}
+
+export async function api_delete_event_member(userId){
+  const token = localStorage.getItem('token')
+  try {
+    const response = await fetch('http://localhost:8080/event_members', {
+        method: 'DELETE',
+        headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+
+        },
+        body: JSON.stringify({ userId })
+    });
+    //if(!response.ok) throw console.error("failed to delete event member")
+} catch (error) {
+    console.error('Error deleting event member', error);
+    throw error;
+}
+}
+
 export 
 {
   api_checkUsername,
@@ -237,7 +307,6 @@ export
   api_get_calendar_event_by_id, 
   api_get_all_calendar_events, 
   api_update_calendar_event, 
-  api_delete_calendar_event,
   api_add_todo_item,
   api_delete_todo_item,
   api_get_todo_item_by_id,

@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+"use client"
+import React, { useEffect, useState } from 'react';
 import Image from 'next/image';
 import lg_sun from '../assets/bx-sun.png';
 import lg_moon from '../assets/bx-moon.png';
@@ -10,10 +11,29 @@ import '../globals.css';
 import NotificationContainer from './NotificationContainer';
 import UserBox from './UserBox';
 import { api_update_theme } from '../api_req';
-
+import jwtDecode from 'jwt-decode';
+const getUsernameFromToken = (token) => {
+    if (!token) return null;
+    try {
+        // Split token into parts and decode the payload (middle part)
+        const base64Url = token.split('.')[1];
+        const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+        const payload = JSON.parse(atob(base64));
+        return payload.id; // Returns the username
+    } catch (e) {
+        console.error("Failed to decode token", e);
+        return null;
+    }
+}
 const TopMenu = ({ theme, setTheme }) => {
     const [isUserBoxOpen, setIsUserBoxOpen] = useState(false);
-    const username = "JohnDoe"; // Replace with actual username from your app's state
+    const [token, setToken] = useState(null);
+
+    useEffect(()=>{
+        setToken(localStorage.getItem('token')) 
+    },[])
+    
+    const username = getUsernameFromToken(token);
 
     const toggleMode = async() => {
          const newTheme = theme === 'light' ? 'dark' : 'light';

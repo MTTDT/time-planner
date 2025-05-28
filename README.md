@@ -16,7 +16,27 @@ bun dev
 ```
 
 Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
-
+ This will load your application, and you should see the login screen along with the sign-up button.
+ ![alt text](image.png) ![alt text](image-1.png)
+Upon successful login, you'll be redirected to the calender page.
+If you don’t have an account, click the Sign Up button to create one.
+![alt text](image-2.png)
+To add an event to the calendar, select the desired date, then enter the event’s title, start time, and end time.
+After creating the event, double-clicking it will open a window displaying the event’s name and time.
+In this window, you'll find two buttons: "Add Notes" and "Share With".
+"Add Notes" opens a simple text editor where you can write additional information.
+"Share With" allows you to enter the username of another account to share the event with.
+![alt text](image-3.png)
+On the left side of the page, there is a sidebar that contains "Settings", "Schedule", and "Notebook".
+In "Settings", you can change the page’s color scheme.
+![alt text](image-4.png)
+In "Schedule", you'll find a calendar that displays your added classes.
+![alt text](image-5.png)
+Classes are recurring events that take place every week or every other week.
+![alt text](image-6.png)
+Lastly, the "Notebook" opens a page where you can create notes containing text, images, and links.
+![alt text](image-7.png)
+On the calendar page, the top right corner includes options for dark mode, messages, and a logout button.
 You can start editing the page by modifying `app/page.js`. The page auto-updates as you edit the file.
 
 This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.

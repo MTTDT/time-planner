@@ -57,7 +57,7 @@ In "Schedule", you'll find a calendar that displays your added classes.
 Classes are recurring events that take place every week or every other week.
 
 <div align="center">
-  <img src="assets/images/recurring-classes.png" alt="Recurring Classes" width="600"/>
+  <img src="assets/images/recurring-events.png" alt="Classes" width="600"/>
 </div>
 
 Lastly, the "Notebook" opens a page where you can create notes containing text, images, and links.

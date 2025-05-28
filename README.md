@@ -1,18 +1,19 @@
 ## Getting Started
-Setting up the database
-First, make sure you have XAMPP on your computer. You can download it from this link https://www.apachefriends.org/download.html. After installing it you need to open XAMPP Control and start Apache and MySQL services. After the services start succesfully you can open PHPMyAdmin tab in your browser by clicking the button Admin in the MySQL row. Nextly find backnend/timedb.sql in Files, download it and then open PHPMyAdmin.
+Setting up the database:
+First, make sure you have XAMPP on your computer. You can download it from this link https://www.apachefriends.org/download.html. After installing it you need to open XAMPP Control and start Apache and MySQL services. After the services start succesfully you can open PHPMyAdmin tab in your browser by clicking the button Admin in the MySQL row. Nextly find backnend/timedb.sql in Files, download it and then open PHPMyAdmin, in the top bar find button named "Import", click on it, scroll down and you should find button "Import". Import the timedb.sql file into PHPMyAdmin. After completing these steps your database should be hosted on your local network.
 
-
-First, run the development server:
-
+Setting up the project environment:
+Run this following command after you opened the project folder
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+npm install
+```
+
+Running the server:
+To run the server in terminal you have to execute following commands
+```bash
+cd time-planner/backend
+
+node server.js
 ```
 
 Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.

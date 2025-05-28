@@ -8,12 +8,19 @@ Run this following command after you opened the project folder
 npm install
 ```
 
+
+
 Running the server:
 To run the server in terminal you have to execute following commands
 ```bash
 cd time-planner/backend
 
 node server.js
+```
+Running frontend:
+Run this following command to run the frontend locally
+```bash
+npm run dev
 ```
 
 Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.

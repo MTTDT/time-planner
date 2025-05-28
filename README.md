@@ -1,6 +1,7 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
-
 ## Getting Started
+Setting up the database
+First, make sure you have XAMPP on your computer. You can download it from this link https://www.apachefriends.org/download.html. After installing it you need to open XAMPP Control and start Apache and MySQL services. After the services start succesfully you can open PHPMyAdmin tab in your browser by clicking the button Admin in the MySQL row. Nextly find backnend/timedb.sql in Files, download it and then open PHPMyAdmin.
+
 
 First, run the development server:
 
